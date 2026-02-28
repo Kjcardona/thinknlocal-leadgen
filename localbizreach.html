@@ -1,0 +1,2675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalBizReach v1.0 — ThinkNLocal</title>
+<style>
+  :root {
+    --navy: #6162DD;
+    --teal: #4a4bc4;
+    --teal-light: #f0f0fc;
+    --hot: #e53e3e;
+    --high: #dd6b20;
+    --medium: #d69e2e;
+    --low: #718096;
+    --green: #2CBC63;
+    --fb: #1877F2;
+    --bg: #f5f6ff;
+    --card: #ffffff;
+    --border: #e2e2f5;
+    --text: #1a1a2e;
+    --muted: #6b6b8a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .header { background: linear-gradient(135deg, #5051c9 0%, #6162DD 50%, #7374e8 100%); color: white; padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+  .header p  { font-size: 0.85rem; opacity: 0.8; margin-top: 2px; }
+  .header-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; }
+  .header-v2 { background: rgba(44,188,99,0.25); border: 1px solid rgba(44,188,99,0.4); border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 700; color: #a8f5c7; margin-right: 8px; }
+
+  .container { max-width: 1300px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .search-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 1.5rem; }
+  .search-card h2 { font-size: 1rem; font-weight: 600; color: var(--navy); margin-bottom: 1rem; }
+
+  .input-row { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
+  .input-group { display: flex; flex-direction: column; gap: 4px; }
+  .input-group label { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .input-group input, .input-group select { border: 1.5px solid var(--border); border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.95rem; outline: none; transition: border-color 0.15s; background: white; color: var(--text); }
+  .input-group input:focus, .input-group select:focus { border-color: var(--teal); }
+  .input-group.city input { width: 240px; }
+  .input-group.state select { width: 90px; }
+  .input-group.depth select { width: 160px; }
+
+  .btn-run { background: linear-gradient(135deg, #2CBC63 0%, #24a856 100%); color: white; border: none; border-radius: 8px; padding: 0.65rem 1.75rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s, transform 0.1s; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .btn-run:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-run:active { transform: translateY(0); }
+  .btn-run:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .source-toggles { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; align-items: center; }
+  .source-toggles span { font-size: 0.8rem; color: var(--muted); font-weight: 600; margin-right: 4px; }
+  .toggle-chip { display: flex; align-items: center; gap: 5px; background: var(--teal-light); border: 1.5px solid transparent; border-radius: 20px; padding: 3px 10px; font-size: 0.78rem; font-weight: 600; color: var(--teal); cursor: pointer; user-select: none; transition: all 0.15s; }
+  .toggle-chip.off { background: #f1f5f9; color: var(--muted); }
+  .toggle-chip input { display: none; }
+  .toggle-chip.fb-chip { background: #e8f0fe; color: var(--fb); }
+  .toggle-chip.fb-chip.off { background: #f1f5f9; color: var(--muted); }
+  .toggle-chip.np-chip { background: #e8fdf0; color: #2a7a4b; }
+  .toggle-chip.np-chip.off { background: #f1f5f9; color: var(--muted); }
+
+  .progress-area { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; display: none; }
+  .progress-area.visible { display: block; }
+  .progress-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 0.75rem; }
+  .progress-bar-wrap { background: #e2e8f0; border-radius: 99px; height: 8px; overflow: hidden; margin-bottom: 1rem; }
+  .progress-bar { background: linear-gradient(90deg, var(--navy), var(--green)); height: 100%; border-radius: 99px; transition: width 0.4s ease; width: 0%; }
+  .progress-log { font-size: 0.82rem; color: var(--muted); line-height: 1.8; max-height: 140px; overflow-y: auto; }
+  .progress-log .log-ok   { color: var(--green); }
+  .progress-log .log-warn { color: var(--high); }
+
+  .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+  .metric-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; text-align: center; }
+  .metric-num { font-size: 1.8rem; font-weight: 800; color: var(--navy); line-height: 1; }
+  .metric-label { font-size: 0.72rem; color: var(--muted); margin-top: 4px; font-weight: 600; }
+  .metric-card.hot   .metric-num { color: var(--hot); }
+  .metric-card.high  .metric-num { color: var(--high); }
+  .metric-card.email .metric-num { color: var(--teal); }
+  .metric-card.fb    .metric-num { color: var(--fb); }
+  .metric-card.np    .metric-num { color: #2a7a4b; }
+
+  .results-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: none; }
+  .results-card.visible { display: block; }
+
+  .results-toolbar { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+  .results-toolbar h2 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+  .toolbar-right { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  .filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+  .filter-btn { border: 1.5px solid var(--border); background: white; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: var(--muted); transition: all 0.12s; }
+  .filter-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+  .filter-btn.hot.active  { background: var(--hot);  border-color: var(--hot);  color: white; }
+  .filter-btn.high.active { background: var(--high); border-color: var(--high); color: white; }
+  .filter-btn.fb.active   { background: var(--fb);   border-color: var(--fb);   color: white; }
+  .filter-btn.np.active   { background: #2a7a4b;     border-color: #2a7a4b;     color: white; }
+
+  .btn-export { background: var(--green); color: white; border: none; border-radius: 8px; padding: 6px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s; display: flex; align-items: center; gap: 5px; }
+  .btn-export:hover { opacity: 0.88; }
+
+  .table-wrap { overflow-x: auto; border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; table-layout: fixed; min-width: 900px; }
+  thead { background: #f8fafc; position: sticky; top: 0; z-index: 1; }
+  th { padding: 0.55rem 0.6rem; text-align: left; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 2px solid var(--border); white-space: nowrap; overflow: hidden; }
+  td { padding: 0.55rem 0.6rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; overflow: hidden; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--teal-light); }
+  /* Fixed column widths */
+  #leadsTable col.col-priority  { width: 60px; }
+  #leadsTable col.col-biz       { width: 165px; }
+  #leadsTable col.col-type      { width: 80px; }
+  #leadsTable col.col-city      { width: 90px; }
+  #leadsTable col.col-email     { width: 145px; }
+  #leadsTable col.col-phone     { width: 110px; }
+  #leadsTable col.col-social    { width: 75px; }
+  #leadsTable col.col-address   { width: 130px; }
+  #leadsTable col.col-history   { width: 100px; }
+  #leadsTable col.col-source    { width: 62px; }
+  #leadsTable col.col-notes     { width: 110px; }
+  /* Editable inline input in results table */
+  .res-input { width:100%; border:1px solid transparent; border-radius:3px; padding:2px 4px; font-size:0.75rem; color:var(--text); background:transparent; font-family:inherit; }
+  .res-input:hover { border-color:#e2e8f0; background:#f8fafc; }
+  .res-input:focus { border-color:var(--teal); background:white; outline:none; box-shadow:0 0 0 2px rgba(74,75,196,0.12); }
+  #leadsTable col.col-enrich    { width: 58px; }
+  #leadsTable col.col-script    { width: 42px; }
+  /* Truncate overflow in cells */
+  #leadsTable td { text-overflow: ellipsis; }
+  .history-cell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; font-size:.75rem; color:#4a5568; cursor:help; }
+  .email-link   { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.76rem; }
+
+  .priority-badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+  .p-Hot    { background: #fed7d7; color: var(--hot); }
+  .p-High   { background: #feebc8; color: var(--high); }
+  .p-Medium { background: #fefcbf; color: #744210; }
+  .p-Low    { background: #e2e8f0; color: var(--muted); }
+
+  .source-badge { display: inline-block; font-size: 0.68rem; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+  .src-tavily        { background: #e8f4fd; color: #2b6cb0; }
+  .src-google_places { background: #e8fdf0; color: #276749; }
+  .src-facebook      { background: #e8f0fe; color: #1877F2; }
+  .src-propublica    { background: #fef3c7; color: #92400e; }
+  .src-nces_seed     { background: #f3e8ff; color: #6b21a8; }
+  .src-yelp          { background: #ffe8e8; color: #c0392b; }
+
+  .biz-name  { font-weight: 600; color: var(--text); }
+  .biz-type  { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+  .email-link { color: var(--teal); text-decoration: none; }
+  .email-link:hover { text-decoration: underline; }
+  .web-link  { color: var(--teal); text-decoration: none; font-size: 0.75rem; }
+  .fb-link   { color: var(--fb); text-decoration: none; font-size: 0.75rem; }
+  .script-btn { background: none; border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; font-size: 0.72rem; cursor: pointer; color: var(--teal); transition: all 0.1s; }
+  .script-btn:hover { background: var(--teal-light); }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.visible { display: flex; }
+  .modal { background: white; border-radius: 12px; padding: 1.5rem; max-width: 520px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal h3 { font-size: 1rem; color: var(--navy); margin-bottom: 0.25rem; }
+  .modal .modal-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem; }
+  .modal textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 0.75rem; font-size: 0.88rem; line-height: 1.6; resize: vertical; min-height: 120px; font-family: inherit; color: var(--text); outline: none; }
+  .modal-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; justify-content: flex-end; }
+  .btn-copy  { background: var(--teal); color: white; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+  .btn-close { background: none; border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; color: var(--muted); }
+
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-state h3 { font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; }
+  .empty-state p { font-size: 0.88rem; max-width: 400px; margin: 0 auto; line-height: 1.6; }
+
+  .settings-toggle { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #6162DD; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; z-index: 400; }
+  .settings-panel { display: none; position: fixed; bottom: 4.5rem; right: 1.5rem; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; width: 360px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); z-index: 500; max-height: 80vh; overflow-y: auto; }
+  .settings-panel.visible { display: block; }
+  .settings-panel h3 { font-size: 0.9rem; font-weight: 700; color: var(--navy); margin-bottom: 0.75rem; }
+  .settings-panel .setting-row { margin-bottom: 0.75rem; }
+  .settings-panel label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .settings-panel input { width: 100%; border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 0.82rem; font-family: monospace; outline: none; color: var(--text); }
+  .settings-panel input:focus { border-color: var(--teal); }
+  .settings-panel .hint { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+  .settings-panel .hint a { color: var(--teal); }
+  .btn-save-settings { width: 100%; background: #6162DD; color: white; border: none; border-radius: 6px; padding: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem; }
+  .saved-msg { font-size: 0.75rem; color: var(--green); text-align: center; margin-top: 0.5rem; display: none; }
+  .settings-divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0 0.75rem; }
+
+  .fans-badge { font-size: 0.7rem; color: var(--fb); background: #e8f0fe; padding: 1px 5px; border-radius: 3px; }
+
+  /* Instagram chip & badge */
+  .toggle-chip.ig-chip { background: #fce4f0; color: #C13584; }
+  .toggle-chip.ig-chip.off { background: #f1f5f9; color: var(--muted); }
+  .src-instagram { background: #fce4f0; color: #C13584; }
+  .filter-btn.ig.active { background: #C13584; border-color: #C13584; color: white; }
+
+  /* League Dirs chip & badge */
+  .toggle-chip.league-chip { background: #e8f8e8; color: #276f27; }
+  .toggle-chip.league-chip.off { background: #f1f5f9; color: var(--muted); }
+  /* Yellow Pages chip */
+  .toggle-chip.yp-chip { background: #fffbea; color: #7a5f00; border-color: #e6c800; }
+  .toggle-chip.yp-chip.off { background: #f1f5f9; color: var(--muted); border-color: transparent; }
+  /* Multi-city chip */
+  .toggle-chip.multicity-chip { background: #eef2ff; color: #3730a3; }
+  .toggle-chip.multicity-chip.off { background: #f1f5f9; color: var(--muted); }
+  /* Source badges for new sources */
+  .src-yellowpages  { background: #fffbea; color: #7a5f00; }
+  .src-ayso         { background: #e8f8e8; color: #276f27; }
+  .src-little_league{ background: #e8f8e8; color: #276f27; }
+  .src-pop_warner   { background: #e8f8e8; color: #276f27; }
+  .src-bsa_scouts   { background: #e8f8e8; color: #276f27; }
+  .src-girl_scouts  { background: #fce4f0; color: #9b2063; }
+  .src-usa_football { background: #e8f8e8; color: #276f27; }
+  .src-youth_soccer { background: #e8f8e8; color: #276f27; }
+  .src-league_dir   { background: #e8f8e8; color: #276f27; }
+  .src-league_site  { background: #e8f8e8; color: #276f27; }
+  .src-school_dir   { background: #f3e8ff; color: #6b21a8; }
+  .src-greek_life   { background: #eef2ff; color: #3730a3; }
+
+  /* Token expiry badge in header */
+  .token-expiry-badge { border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .token-expiry-ok   { background: rgba(44,188,99,0.25); border: 1px solid rgba(44,188,99,0.4); color: #a8f5c7; }
+  .token-expiry-warn { background: rgba(255,180,0,0.35); border: 1px solid rgba(255,180,0,0.5); color: #ffe066; }
+  .token-expiry-danger { background: rgba(229,62,62,0.35); border: 1px solid rgba(229,62,62,0.5); color: #ffb3b3; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.65; } }
+
+  /* ── v2.2: Tabs ── */
+  .view-tabs { display:flex; gap:0; border-bottom: 2px solid var(--border); margin-bottom:1.5rem; }
+  .view-tab { padding: 0.6rem 1.4rem; font-size:0.88rem; font-weight:700; cursor:pointer; border:none; background:none; color:var(--muted); border-bottom:3px solid transparent; margin-bottom:-2px; transition:all 0.15s; }
+  .view-tab.active { color:var(--navy); border-bottom-color:var(--navy); }
+  .view-tab:hover:not(.active) { color:var(--text); }
+
+  /* ── v2.2: Save & Enrich buttons ── */
+  .btn-save-db  { background:#10b981; color:white; border:none; border-radius:8px; padding:6px 16px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px; transition:opacity 0.15s; }
+  .btn-save-db:hover { opacity:0.88; }
+  .btn-save-db:disabled { opacity:0.45; cursor:not-allowed; }
+  .btn-enrich   { background:#f59e0b; color:white; border:none; border-radius:8px; padding:6px 16px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px; transition:opacity 0.15s; }
+  .btn-enrich:hover { opacity:0.88; }
+  .enrich-cell  { background:#fffbeb; border:none; border-radius:4px; padding:2px 7px; font-size:0.7rem; font-weight:700; cursor:pointer; color:#92400e; white-space:nowrap; transition:all 0.1s; }
+  .enrich-cell:hover { background:#fde68a; }
+  .enrich-cell.done { background:#d1fae5; color:#065f46; cursor:default; }
+
+  /* ── v2.2: Status badges ── */
+  .status-select { border:1.5px solid var(--border); border-radius:5px; padding:2px 6px; font-size:0.72rem; font-weight:700; cursor:pointer; outline:none; background:white; }
+  .status-New         { border-color:#c3dafe; color:#3730a3; background:#e0e7ff; }
+  .status-Contacted   { border-color:#fde68a; color:#92400e; background:#fffbeb; }
+  .status-Interested  { border-color:#a7f3d0; color:#065f46; background:#d1fae5; }
+  .status-Scheduled   { border-color:#bfdbfe; color:#1d4ed8; background:#dbeafe; }
+  .status-Closed      { border-color:#bbf7d0; color:#14532d; background:#dcfce7; font-weight:800; }
+  .status-NotInterested { border-color:#fecaca; color:#991b1b; background:#fee2e2; }
+
+  /* ── v2.2: Notes inline ── */
+  .notes-input { width:100%; border:1px solid transparent; border-radius:4px; padding:2px 5px; font-size:0.75rem; color:var(--muted); background:transparent; resize:none; font-family:inherit; min-width:80px; }
+  .notes-input:focus { border-color:var(--border); background:white; outline:none; }
+
+  /* ── Pipeline editable fields ── */
+  .pl-input { width:100%; border:1px solid transparent; border-radius:4px; padding:2px 5px; font-size:0.75rem; color:var(--text); background:transparent; font-family:inherit; }
+  .pl-input:hover { border-color:#e2e8f0; background:#f8fafc; }
+  .pl-input:focus { border-color:var(--teal); background:white; outline:none; box-shadow:0 0 0 2px rgba(0,180,160,0.15); }
+  .pl-input.verified { color:#065f46; font-weight:600; }
+  /* Verified rows get a subtle green left border */
+  tr.pl-verified td:first-child { border-left:3px solid #10b981; }
+  tr.pl-verified { background:#f0fdf4 !important; }
+  tr.pl-verified:hover td { background:#dcfce7 !important; }
+  /* Verified badge */
+  .verified-badge { display:inline-flex; align-items:center; gap:3px; font-size:0.68rem; font-weight:700; color:#065f46; background:#d1fae5; padding:1px 6px; border-radius:8px; margin-top:2px; }
+  /* Verify toggle button */
+  .btn-verify { font-size:10px; padding:1px 6px; border-radius:10px; border:1px solid #d1fae5; cursor:pointer; font-weight:700; line-height:1.4; transition:all 0.12s; }
+  .btn-verify.unverified { background:#f8fafc; color:#718096; border-color:#e2e8f0; }
+  .btn-verify.unverified:hover { background:#dcfce7; color:#065f46; border-color:#10b981; }
+  .btn-verify.is-verified  { background:#d1fae5; color:#065f46; border-color:#10b981; }
+  /* Save flash on a cell */
+  @keyframes savePulse { 0%{background:#d1fae5} 100%{background:transparent} }
+  .save-flash { animation: savePulse 1.2s ease forwards; }
+
+  /* ── v2.2: Pipeline view ── */
+  .pipeline-toolbar { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; }
+  .pipeline-stat { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-size:0.78rem; color:var(--muted); font-weight:600; }
+  .pipeline-stat span { color:var(--navy); font-weight:800; margin-right:3px; }
+  .pipeline-filter { border:1.5px solid var(--border); border-radius:6px; padding:4px 10px; font-size:0.78rem; background:white; color:var(--muted); cursor:pointer; font-weight:600; transition:all 0.12s; }
+  .pipeline-filter.active { background:var(--navy); color:white; border-color:var(--navy); }
+  .db-notice { font-size:0.78rem; padding:8px 12px; border-radius:6px; margin-bottom:0.75rem; }
+  .db-notice.setup { background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+  .db-notice.ok    { background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; }
+
+  /* Extend token button */
+  .btn-extend { width: 100%; background: #1877F2; color: white; border: none; border-radius: 6px; padding: 7px; font-size: 0.82rem; font-weight: 700; cursor: pointer; margin-top: 0.4rem; transition: opacity 0.15s; }
+  .btn-extend:hover { opacity: 0.88; }
+  .extend-msg { font-size: 0.72rem; text-align: center; margin-top: 0.35rem; display: none; }
+
+  @media (max-width: 700px) {
+    .container { padding: 1rem; }
+    .input-group.city input { width: 100%; }
+    .header { padding: 1rem; }
+    .header h1 { font-size: 1.2rem; }
+    .settings-panel { width: calc(100vw - 2rem); right: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:14px">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="18" r="18" fill="#2CBC63"/>
+      <path d="M18 8C13.58 8 10 11.58 10 16c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8zm0 10.5A2.5 2.5 0 1 1 18 13a2.5 2.5 0 0 1 0 5.5z" fill="white"/>
+      <circle cx="18" cy="15.5" r="1.5" fill="#2CBC63"/>
+    </svg>
+    <div>
+      <h1>LocalBizReach <span style="font-weight:400;opacity:0.75;font-size:1rem">by thinknlocal</span></h1>
+      <p>AI-Powered Local Business Lead Discovery · Internal Tool</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div id="tokenExpiryBadge" class="token-expiry-badge" style="display:none" onclick="toggleSettings()" title="Click to manage Facebook token"></div>
+    <div class="header-v2" id="versionBadge" title="Build date">v1.0</div>
+    <div class="header-badge">Team Access</div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="container">
+
+  <!-- Tab navigation -->
+  <div class="view-tabs">
+    <button class="view-tab active" id="tab-search" onclick="switchTab('search')">🔍 Search & Discover</button>
+    <button class="view-tab" id="tab-pipeline" onclick="switchTab('pipeline')">📊 My Pipeline</button>
+  </div>
+
+  <!-- ═══ SEARCH VIEW ═══ -->
+  <div id="view-search">
+
+  <!-- Search card -->
+  <div class="search-card">
+    <h2>Find local businesses in any city — Google Places, Facebook, Yelp, Instagram &amp; more</h2>
+    <div class="input-row">
+      <div class="input-group city">
+        <label>City</label>
+        <input type="text" id="cityInput" placeholder="e.g. San Gabriel" />
+      </div>
+      <div class="input-group state">
+        <label>State</label>
+        <select id="stateInput">
+          <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option>
+          <option value="AR">AR</option><option value="CA" selected>CA</option><option value="CO">CO</option>
+          <option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option>
+          <option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option>
+          <option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option>
+          <option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option>
+          <option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option>
+          <option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option>
+          <option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option>
+          <option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option>
+          <option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option>
+          <option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option>
+          <option value="OR">OR</option><option value="PA">PA</option><option value="RI">RI</option>
+          <option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option>
+          <option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option>
+          <option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option>
+          <option value="WI">WI</option><option value="WY">WY</option>
+        </select>
+      </div>
+      <div class="input-group depth">
+        <label>Depth</label>
+        <select id="depthInput">
+          <option value="standard">Standard (~200)</option>
+          <option value="deep">Deep (~500)</option>
+          <option value="max" selected>Max (~1000+)</option>
+        </select>
+      </div>
+      <button class="btn-run" id="runBtn" onclick="runDiscovery()">
+        <span>🚀</span> Run Discovery
+      </button>
+    </div>
+
+    <div class="source-toggles">
+      <span>Sources:</span>
+      <label class="toggle-chip" id="chip-tavily">
+        <input type="checkbox" id="src-tavily" checked onchange="updateChip('tavily')">
+        🔍 Tavily AI
+      </label>
+      <label class="toggle-chip" id="chip-google">
+        <input type="checkbox" id="src-google" checked onchange="updateChip('google')">
+        🗺️ Google Places
+      </label>
+      <label class="toggle-chip fb-chip" id="chip-facebook">
+        <input type="checkbox" id="src-facebook" checked onchange="updateChip('facebook')">
+        📘 Facebook Pages
+      </label>
+      <label class="toggle-chip ig-chip" id="chip-instagram">
+        <input type="checkbox" id="src-instagram" checked onchange="updateChip('instagram')">
+        📷 Instagram
+      </label>
+      <label class="toggle-chip yp-chip" id="chip-yp">
+        <input type="checkbox" id="src-yp" checked onchange="updateChip('yp')">
+        📒 Yellow Pages
+      </label>
+      <label class="toggle-chip" id="chip-yelp" style="background:#ffe8e8;color:#d32323">
+        <input type="checkbox" id="src-yelp" checked onchange="updateChip('yelp')">
+        🟥 Yelp
+      </label>
+      <label class="toggle-chip multicity-chip" id="chip-multicity">
+        <input type="checkbox" id="src-multicity" onchange="updateChip('multicity')">
+        🌆 Nearby Cities
+      </label>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-area" id="progressArea">
+    <div class="progress-title" id="progressTitle">Searching...</div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-log" id="progressLog"></div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics-row" id="metricsRow" style="display:none">
+    <div class="metric-card">
+      <div class="metric-num" id="mTotal">0</div>
+      <div class="metric-label">Total Leads</div>
+    </div>
+    <div class="metric-card hot">
+      <div class="metric-num" id="mHot">0</div>
+      <div class="metric-label">🔥 Hot</div>
+    </div>
+    <div class="metric-card high">
+      <div class="metric-num" id="mHigh">0</div>
+      <div class="metric-label">⬆️ High</div>
+    </div>
+    <div class="metric-card email">
+      <div class="metric-num" id="mEmail">0</div>
+      <div class="metric-label">✉️ Have Email</div>
+    </div>
+    <div class="metric-card fb">
+      <div class="metric-num" id="mFb">0</div>
+      <div class="metric-label">📘 Facebook</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num" id="mPhone">0</div>
+      <div class="metric-label">📞 Have Phone</div>
+    </div>
+    <div class="metric-card" style="--accent:#C13584">
+      <div class="metric-num" id="mIg" style="color:#C13584">0</div>
+      <div class="metric-label">📷 Instagram</div>
+    </div>
+    <div class="metric-card" style="--accent:#d32323">
+      <div class="metric-num" id="mYelp" style="color:#d32323">0</div>
+      <div class="metric-label">🟥 Yelp</div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-card" id="resultsCard">
+    <div class="results-toolbar">
+      <h2 id="resultsTitle">Results</h2>
+      <div class="toolbar-right">
+        <div class="filter-group">
+          <button class="filter-btn active" onclick="filterLeads('all', this)">All</button>
+          <button class="filter-btn hot"  onclick="filterLeads('Hot', this)">🔥 Hot</button>
+          <button class="filter-btn high" onclick="filterLeads('High', this)">⬆️ High</button>
+          <button class="filter-btn" onclick="filterLeads('Food & Drink', this)">🍽️ Food</button>
+          <button class="filter-btn" onclick="filterLeads('Beauty & Wellness', this)">💇 Beauty</button>
+          <button class="filter-btn" onclick="filterLeads('Fitness', this)">🏋️ Fitness</button>
+          <button class="filter-btn" onclick="filterLeads('Auto & Home Services', this)">🔧 Services</button>
+          <button class="filter-btn" onclick="filterLeads('Health & Medical', this)">🏥 Health</button>
+          <button class="filter-btn" onclick="filterLeads('Professional Services', this)">💼 Pro</button>
+          <button class="filter-btn fb"  onclick="filterLeads('facebook', this)">📘 Facebook</button>
+          <button class="filter-btn ig"  onclick="filterLeads('instagram', this)">📷 Instagram</button>
+          <button class="filter-btn" style="color:#d32323;border-color:#d32323" onclick="filterLeads('yelp', this)">🟥 Yelp</button>
+        </div>
+        <button class="btn-enrich"   id="enrichAllBtn" onclick="enrichAll()">🔍 Enrich All</button>
+        <button class="btn-save-db" id="saveDbBtn"    onclick="saveAllToDb()">💾 Save to Pipeline</button>
+        <button class="btn-export"  onclick="exportCSV()">⬇️ CSV</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="leadsTable">
+        <colgroup>
+          <col class="col-priority"><col class="col-biz"><col class="col-type">
+          <col class="col-city">
+          <col class="col-email"><col class="col-phone"><col class="col-social">
+          <col class="col-address">
+          <col class="col-history"><col class="col-source"><col class="col-notes">
+          <col class="col-enrich"><col class="col-script">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Pri.</th>
+            <th>Business</th>
+            <th>Type</th>
+            <th>City</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Social</th>
+            <th>Address</th>
+            <th title="Fundraiser History">History</th>
+            <th>Src</th>
+            <th>Notes</th>
+            <th title="Enrich — auto-fill missing contact info">Fill</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="leadsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState">
+    <div class="icon">🎯</div>
+    <h3>Ready to find leads</h3>
+    <p>Enter a city, choose your depth, and click <strong>Run Discovery</strong> to find local orgs across Google, Facebook, IRS nonprofit database, and more.</p>
+  </div>
+
+  </div><!-- /view-search -->
+
+  <!-- ═══ PIPELINE VIEW ═══ -->
+  <div id="view-pipeline" style="display:none">
+    <div id="dbNotice" class="db-notice setup">
+      ⚠️ No Supabase configured — add your Project URL + Anon Key in ⚙️ Settings to enable the pipeline.
+    </div>
+
+    <div class="pipeline-toolbar">
+      <div class="pipeline-stat"><span id="plTotal">0</span> Total</div>
+      <div class="pipeline-stat"><span id="plNew">0</span> New</div>
+      <div class="pipeline-stat" style="color:#92400e"><span id="plContacted">0</span> Contacted</div>
+      <div class="pipeline-stat" style="color:#065f46"><span id="plInterested">0</span> Interested</div>
+      <div class="pipeline-stat" style="color:#1d4ed8"><span id="plScheduled">0</span> Scheduled</div>
+      <div class="pipeline-stat" style="color:#14532d"><span id="plClosed">0</span> Closed</div>
+      <div style="flex:1"></div>
+      <button class="pipeline-filter active" id="pf-all" onclick="filterPipeline('all',this)">All</button>
+      <button class="pipeline-filter" id="pf-New" onclick="filterPipeline('New',this)">🆕 New</button>
+      <button class="pipeline-filter" id="pf-Contacted" onclick="filterPipeline('Contacted',this)">📞 Contacted</button>
+      <button class="pipeline-filter" id="pf-Interested" onclick="filterPipeline('Interested',this)">⭐ Interested</button>
+      <button class="pipeline-filter" id="pf-Scheduled" onclick="filterPipeline('Scheduled',this)">📅 Scheduled</button>
+      <button class="pipeline-filter" id="pf-Closed" onclick="filterPipeline('Closed',this)">✅ Closed</button>
+      <button class="btn-save-db" onclick="loadPipeline()" style="background:#6162DD">🔄 Refresh</button>
+      <button class="btn-save-db" id="btn-enrich-pipeline" onclick="enrichAllPipeline()" style="background:#f59e0b">🔍 Enrich Missing</button>
+      <button class="btn-save-db" id="btn-push-ghl" onclick="pushAllToGHL()" style="background:#6366f1">📤 Push All → GHL</button>
+    </div>
+
+    <div class="results-card" style="display:block">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Business</th>
+              <th>Category</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Website / Social</th>
+              <th>Notes</th>
+              <th>Source</th>
+              <th title="Auto-fill missing email/phone">Fill</th>
+              <th title="Push to GoHighLevel CRM">GHL</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="pipelineBody">
+            <tr><td colspan="10" style="text-align:center;padding:2rem;color:#718096">Load your pipeline to see saved leads</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /view-pipeline -->
+
+</div>
+
+<!-- Script modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h3 id="modalTitle">Outreach Script</h3>
+    <div class="modal-sub" id="modalSub"></div>
+    <textarea id="modalScript" rows="5"></textarea>
+    <div class="modal-actions">
+      <button class="btn-close" onclick="document.getElementById('modalOverlay').classList.remove('visible')">Close</button>
+      <button class="btn-copy" onclick="copyScript()">📋 Copy</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<button class="settings-toggle" onclick="toggleSettings()" title="API Keys">⚙️</button>
+<div class="settings-panel" id="settingsPanel">
+  <h3>⚙️ API Keys &amp; Settings</h3>
+  <div class="setting-row">
+    <label>Tavily API Keys <span style="font-weight:400;text-transform:none;font-size:0.7rem;color:#10b981">— rotate automatically when one hits its limit</span></label>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-top:3px">
+      <input type="password" id="set-tavily"  placeholder="tvly-... (Key 1)" />
+      <input type="password" id="set-tavily2" placeholder="tvly-... (Key 2, optional)" />
+      <input type="password" id="set-tavily3" placeholder="tvly-... (Key 3, optional)" />
+      <input type="password" id="set-tavily4" placeholder="tvly-... (Key 4, optional)" />
+    </div>
+    <div class="hint" style="margin-top:4px">Get keys at <a href="https://tavily.com" target="_blank">tavily.com</a> → API Keys</div>
+  </div>
+  <div class="setting-row">
+    <label>Google Places API Key</label>
+    <input type="password" id="set-google" placeholder="AIza..." />
+  </div>
+  <hr class="settings-divider">
+  <div class="setting-row">
+    <label>Facebook Access Token</label>
+    <input type="password" id="set-facebook" placeholder="EAABm..." />
+    <div id="fb-expiry-info" style="display:none;margin-top:5px;padding:6px 8px;border-radius:6px;font-size:0.72rem;font-weight:700"></div>
+    <div class="hint" style="margin-top:3px">Get at <a href="https://developers.facebook.com/tools/explorer" target="_blank">Graph API Explorer</a> → pages_read_engagement</div>
+  </div>
+
+  <!-- Extend token to 60 days -->
+  <div style="background:#f0f4ff;border-radius:8px;padding:10px;margin-top:6px">
+    <div style="font-size:0.75rem;font-weight:700;color:#2b4abc;margin-bottom:6px">🔄 Extend Token to 60 Days</div>
+    <div class="setting-row" style="margin-bottom:5px">
+      <label>App ID <span style="text-transform:none;font-weight:400">(from Meta App → Settings → Basic)</span></label>
+      <input type="text" id="set-fb-appid" placeholder="1234567890" style="font-family:monospace" />
+    </div>
+    <div class="setting-row" style="margin-bottom:5px">
+      <label>App Secret</label>
+      <input type="password" id="set-fb-appsecret" placeholder="abc123def456..." style="font-family:monospace" />
+    </div>
+    <button class="btn-extend" onclick="extendToken()">🔄 Exchange for Long-Lived Token (60 days)</button>
+    <div class="extend-msg" id="extendMsg"></div>
+  </div>
+
+  <hr class="settings-divider">
+  <div class="setting-row">
+    <label>Yelp API Key (optional)</label>
+    <input type="password" id="set-yelp" placeholder="yelp-..." />
+    <div class="hint">Free at <a href="https://fusion.yelp.com/" target="_blank">fusion.yelp.com</a> (500 calls/day)</div>
+  </div>
+  <hr class="settings-divider">
+  <div style="font-size:0.75rem;font-weight:700;color:#10b981;margin-bottom:6px">💾 Supabase (Pipeline Database)</div>
+  <div class="setting-row">
+    <label>Project URL</label>
+    <input type="text" id="set-sb-url" placeholder="https://xxxx.supabase.co" />
+    <div class="hint">Project Settings → API → Project URL</div>
+  </div>
+  <div class="setting-row">
+    <label>Anon / Public Key</label>
+    <input type="password" id="set-sb-anon" placeholder="eyJ..." />
+    <div class="hint">Project Settings → API → anon public key</div>
+  </div>
+  <div id="sb-status-msg" class="hint" style="margin-top:4px;display:none"></div>
+  <hr class="settings-divider">
+  <div style="font-size:0.75rem;font-weight:700;color:#f59e0b;margin-bottom:6px">🔍 Hunter.io (Email Finder)</div>
+  <div class="setting-row">
+    <label>Hunter.io API Key</label>
+    <input type="password" id="set-hunter" placeholder="hunter-api-key..." />
+    <div class="hint">Free 25/mo at <a href="https://hunter.io" target="_blank">hunter.io</a> → API → Key</div>
+  </div>
+  <hr class="settings-divider">
+  <div style="font-size:0.75rem;font-weight:700;color:#6366f1;margin-bottom:6px">🏠 GoHighLevel (CRM Sync)</div>
+  <div class="setting-row">
+    <label>GHL API Key</label>
+    <input type="password" id="set-ghl" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+    <div class="hint">GHL → Settings → Integrations → API Key</div>
+  </div>
+  <button class="btn-save-settings" onclick="saveSettings()">Save Keys</button>
+  <div class="saved-msg" id="savedMsg">✅ Keys saved!</div>
+</div>
+
+<script>
+// ── Version ───────────────────────────────────────────────────────────────────
+const APP_VERSION   = 'v1.0';
+const APP_BUILD     = '2026-02-28 · Build 1';  // update this on every meaningful change
+document.addEventListener('DOMContentLoaded', () => {
+  const badge = document.getElementById('versionBadge');
+  if (badge) badge.title = `LocalBizReach ${APP_VERSION} — ${APP_BUILD}`;
+  badge.textContent = APP_VERSION;
+});
+
+// ── API Keys ─────────────────────────────────────────────────────────────────
+const DEFAULT_KEYS = {
+  tavily:   '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',
+  tavily2:  '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',
+  tavily3:  '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',
+  tavily4:  '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',
+  google:   'AIzaSyBx0l1p93keocSgiyY1uw2UCvKrwS0NNEo',
+  facebook: '',
+  yelp:     ''
+};
+
+const DEFAULT_SB = {
+  url:  'https://lafzktnkqqepgxzojeto.supabase.co',
+  anon: 'sb_publishable_OqGF0tWUg5022NiUNqdffQ_wgp9wjIH'
+};
+
+const DEFAULT_GHL_KEY = '50ce827d-983c-4672-8cd6-fb5f7e0624e5';
+
+function getKey(name) {
+  return localStorage.getItem('lbr_key_' + name) || DEFAULT_KEYS[name] || '';
+}
+
+// Returns array of all configured Tavily keys (up to 5), deduplicated
+function getTavilyPool() {
+  const slots = ['tavily','tavily2','tavily3','tavily4','tavily5'];
+  return [...new Set(slots.map(s => getKey(s)).filter(k => k && k.startsWith('tvly')))];
+}
+
+// ── Nearby Locations for Multi-City Sweep ────────────────────────────────────
+// Returns a list of nearby cities/suburbs for the given city/state
+// Coverage for the most common US metros. Falls back to empty array.
+function getNearbyLocations(city, state) {
+  const key = `${city.toLowerCase().trim()},${state.toUpperCase().trim()}`;
+  const map = {
+    // Southern California
+    'los angeles,CA':     [{city:'Glendale',state:'CA'},{city:'Burbank',state:'CA'},{city:'Pasadena',state:'CA'},{city:'Torrance',state:'CA'},{city:'Inglewood',state:'CA'},{city:'Hawthorne',state:'CA'},{city:'El Monte',state:'CA'}],
+    'riverside,CA':       [{city:'Corona',state:'CA'},{city:'Moreno Valley',state:'CA'},{city:'Fontana',state:'CA'},{city:'Ontario',state:'CA'},{city:'San Bernardino',state:'CA'},{city:'Redlands',state:'CA'}],
+    'san diego,CA':       [{city:'Chula Vista',state:'CA'},{city:'El Cajon',state:'CA'},{city:'Oceanside',state:'CA'},{city:'Escondido',state:'CA'},{city:'Santee',state:'CA'}],
+    'anaheim,CA':         [{city:'Santa Ana',state:'CA'},{city:'Garden Grove',state:'CA'},{city:'Fullerton',state:'CA'},{city:'Orange',state:'CA'},{city:'Irvine',state:'CA'}],
+    'irvine,CA':          [{city:'Anaheim',state:'CA'},{city:'Santa Ana',state:'CA'},{city:'Costa Mesa',state:'CA'},{city:'Tustin',state:'CA'},{city:'Lake Forest',state:'CA'}],
+    // Northern California
+    'san jose,CA':        [{city:'Santa Clara',state:'CA'},{city:'Sunnyvale',state:'CA'},{city:'Milpitas',state:'CA'},{city:'Campbell',state:'CA'},{city:'Morgan Hill',state:'CA'}],
+    'san francisco,CA':   [{city:'Oakland',state:'CA'},{city:'Daly City',state:'CA'},{city:'South San Francisco',state:'CA'},{city:'San Mateo',state:'CA'}],
+    'sacramento,CA':      [{city:'Elk Grove',state:'CA'},{city:'Roseville',state:'CA'},{city:'Folsom',state:'CA'},{city:'Citrus Heights',state:'CA'},{city:'Rancho Cordova',state:'CA'}],
+    // Texas
+    'houston,TX':         [{city:'Pasadena',state:'TX'},{city:'Pearland',state:'TX'},{city:'Sugar Land',state:'TX'},{city:'Katy',state:'TX'},{city:'Spring',state:'TX'},{city:'Humble',state:'TX'}],
+    'dallas,TX':          [{city:'Fort Worth',state:'TX'},{city:'Garland',state:'TX'},{city:'Irving',state:'TX'},{city:'Plano',state:'TX'},{city:'Arlington',state:'TX'},{city:'Mesquite',state:'TX'}],
+    'san antonio,TX':     [{city:'New Braunfels',state:'TX'},{city:'Schertz',state:'TX'},{city:'Converse',state:'TX'},{city:'Universal City',state:'TX'}],
+    'austin,TX':          [{city:'Round Rock',state:'TX'},{city:'Cedar Park',state:'TX'},{city:'Pflugerville',state:'TX'},{city:'Georgetown',state:'TX'},{city:'Kyle',state:'TX'}],
+    // Florida
+    'miami,FL':           [{city:'Hialeah',state:'FL'},{city:'Miami Gardens',state:'FL'},{city:'Homestead',state:'FL'},{city:'North Miami',state:'FL'},{city:'Coral Gables',state:'FL'}],
+    'orlando,FL':         [{city:'Kissimmee',state:'FL'},{city:'Sanford',state:'FL'},{city:'Altamonte Springs',state:'FL'},{city:'Winter Garden',state:'FL'},{city:'Apopka',state:'FL'}],
+    'tampa,FL':           [{city:'St. Petersburg',state:'FL'},{city:'Clearwater',state:'FL'},{city:'Brandon',state:'FL'},{city:'Largo',state:'FL'}],
+    'jacksonville,FL':    [{city:'Orange Park',state:'FL'},{city:'St. Augustine',state:'FL'},{city:'Fernandina Beach',state:'FL'}],
+    // New York
+    'new york,NY':        [{city:'Yonkers',state:'NY'},{city:'Bronx',state:'NY'},{city:'Brooklyn',state:'NY'},{city:'Queens',state:'NY'},{city:'Staten Island',state:'NY'}],
+    'buffalo,NY':         [{city:'Cheektowaga',state:'NY'},{city:'Amherst',state:'NY'},{city:'Tonawanda',state:'NY'},{city:'Niagara Falls',state:'NY'}],
+    // Illinois
+    'chicago,IL':         [{city:'Aurora',state:'IL'},{city:'Joliet',state:'IL'},{city:'Naperville',state:'IL'},{city:'Rockford',state:'IL'},{city:'Elgin',state:'IL'},{city:'Evanston',state:'IL'}],
+    // Pennsylvania
+    'philadelphia,PA':    [{city:'Reading',state:'PA'},{city:'Allentown',state:'PA'},{city:'Chester',state:'PA'},{city:'Camden',state:'NJ'},{city:'Norristown',state:'PA'}],
+    // Ohio
+    'columbus,OH':        [{city:'Westerville',state:'OH'},{city:'Grove City',state:'OH'},{city:'Hilliard',state:'OH'},{city:'Dublin',state:'OH'},{city:'Gahanna',state:'OH'}],
+    'cleveland,OH':       [{city:'Lakewood',state:'OH'},{city:'Parma',state:'OH'},{city:'Euclid',state:'OH'},{city:'Lorain',state:'OH'}],
+    // Georgia
+    'atlanta,GA':         [{city:'Sandy Springs',state:'GA'},{city:'Marietta',state:'GA'},{city:'Columbus',state:'GA'},{city:'Roswell',state:'GA'},{city:'Smyrna',state:'GA'},{city:'Alpharetta',state:'GA'}],
+    // Arizona
+    'phoenix,AZ':         [{city:'Scottsdale',state:'AZ'},{city:'Mesa',state:'AZ'},{city:'Tempe',state:'AZ'},{city:'Chandler',state:'AZ'},{city:'Gilbert',state:'AZ'},{city:'Glendale',state:'AZ'}],
+    'tucson,AZ':          [{city:'Marana',state:'AZ'},{city:'Oro Valley',state:'AZ'},{city:'Sahuarita',state:'AZ'}],
+    // North Carolina
+    'charlotte,NC':       [{city:'Concord',state:'NC'},{city:'Gastonia',state:'NC'},{city:'Rock Hill',state:'SC'},{city:'Huntersville',state:'NC'},{city:'Kannapolis',state:'NC'}],
+    // Nevada
+    'las vegas,NV':       [{city:'Henderson',state:'NV'},{city:'North Las Vegas',state:'NV'},{city:'Boulder City',state:'NV'},{city:'Summerlin',state:'NV'}],
+    // Washington
+    'seattle,WA':         [{city:'Bellevue',state:'WA'},{city:'Tacoma',state:'WA'},{city:'Redmond',state:'WA'},{city:'Kirkland',state:'WA'},{city:'Renton',state:'WA'}],
+    // Colorado
+    'denver,CO':          [{city:'Aurora',state:'CO'},{city:'Lakewood',state:'CO'},{city:'Westminster',state:'CO'},{city:'Arvada',state:'CO'},{city:'Englewood',state:'CO'}],
+    // Michigan
+    'detroit,MI':         [{city:'Warren',state:'MI'},{city:'Sterling Heights',state:'MI'},{city:'Dearborn',state:'MI'},{city:'Livonia',state:'MI'},{city:'Westland',state:'MI'}],
+    // Tennessee
+    'nashville,TN':       [{city:'Murfreesboro',state:'TN'},{city:'Franklin',state:'TN'},{city:'Smyrna',state:'TN'},{city:'Hendersonville',state:'TN'}],
+    'memphis,TN':         [{city:'Bartlett',state:'TN'},{city:'Collierville',state:'TN'},{city:'Germantown',state:'TN'}],
+    // Virginia
+    'virginia beach,VA':  [{city:'Norfolk',state:'VA'},{city:'Chesapeake',state:'VA'},{city:'Hampton',state:'VA'},{city:'Newport News',state:'VA'}],
+    // Indiana
+    'indianapolis,IN':    [{city:'Carmel',state:'IN'},{city:'Fishers',state:'IN'},{city:'Lawrence',state:'IN'},{city:'Greenwood',state:'IN'}],
+    // Missouri
+    'kansas city,MO':     [{city:'Independence',state:'MO'},{city:'Overland Park',state:'KS'},{city:'Olathe',state:'KS'},{city:'Lees Summit',state:'MO'}],
+    // Oregon
+    'portland,OR':        [{city:'Gresham',state:'OR'},{city:'Hillsboro',state:'OR'},{city:'Beaverton',state:'OR'},{city:'Tigard',state:'OR'},{city:'Lake Oswego',state:'OR'}],
+  };
+  return map[key] || [];
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+let allLeads = [];
+let filteredLeads = [];
+let currentFilter = 'all';
+
+// ── Main Discovery ───────────────────────────────────────────────────────────
+async function runDiscovery() {
+  const city  = document.getElementById('cityInput').value.trim();
+  const stateVal = document.getElementById('stateInput').value;
+  const depth = document.getElementById('depthInput').value;
+
+  if (!city) {
+    document.getElementById('cityInput').focus();
+    document.getElementById('cityInput').style.borderColor = '#e53e3e';
+    setTimeout(() => document.getElementById('cityInput').style.borderColor = '', 1500);
+    return;
+  }
+
+  allLeads = [];
+  resetTavilyPool();  // reset key-pool rotation for each new search
+  setProgress(true);
+  document.getElementById('resultsCard').classList.remove('visible');
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('metricsRow').style.display = 'none';
+  document.getElementById('runBtn').disabled = true;
+  setProgressBar(3, `🚀 Starting ${depth} discovery for ${city}, ${stateVal}...`);
+
+  const useTavily     = document.getElementById('src-tavily').checked;
+  const useGoogle     = document.getElementById('src-google').checked;
+  const useFacebook   = document.getElementById('src-facebook').checked;
+  const useInstagram  = document.getElementById('src-instagram').checked;
+  const useYP         = document.getElementById('src-yp').checked;
+  const useYelp       = document.getElementById('src-yelp').checked;
+  const multiCity     = document.getElementById('src-multicity').checked;
+
+  // Build city list — optionally include nearby suburbs
+  const cityList = [{ city, state: stateVal }];
+  if (multiCity) {
+    const nearby = getNearbyLocations(city, stateVal);
+    nearby.forEach(loc => cityList.push(loc));
+    logProgress(`🌆 Multi-city sweep: ${cityList.map(l=>l.city).join(', ')}`);
+  }
+
+  try {
+    // Run all cities (main + nearby suburbs)
+    for (const loc of cityList) {
+      const c = loc.city, s = loc.state;
+      if (c !== city) logProgress(`🔄 Now searching: ${c}, ${s}...`);
+
+      // Run sources in parallel groups
+      const group1 = [];
+      if (useTavily)    group1.push(runTavily(c, s, depth));
+      if (useInstagram) group1.push(runInstagram(c, s, depth));
+      if (useYP)        group1.push(runYellowPages(c, s, depth));
+      if (useYelp)      group1.push(runYelp(c, s, depth));
+
+      const group2 = [];
+      if (useGoogle)   group2.push(runGooglePlaces(c, s, depth));
+      if (useFacebook) group2.push(runFacebook(c, s, depth));
+
+      const r1 = await Promise.allSettled(group1);
+      r1.forEach(r => { if (r.status === 'fulfilled' && r.value) allLeads.push(...r.value); });
+
+      const r2 = await Promise.allSettled(group2);
+      r2.forEach(r => { if (r.status === 'fulfilled' && r.value) allLeads.push(...r.value); });
+    }
+
+    // Deduplicate on name + phone
+    const seen = new Set();
+    allLeads = allLeads.filter(l => {
+      const k1 = l.name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+      const k2 = l.phone ? l.phone.replace(/\D/g, '') : '';
+      const key = k2.length >= 10 ? k2 : k1;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      if (k1.length > 5) seen.add(k1);
+      return true;
+    });
+
+    allLeads = allLeads.map(scoreLead);
+    allLeads.sort((a, b) => b.score - a.score);
+
+    setProgressBar(100, `✅ Done! Found ${allLeads.length} leads in ${city}, ${stateVal}`);
+    await sleep(400);
+    renderResults(city, stateVal);
+
+  } catch(err) {
+    logProgress(`❌ Error: ${err.message}`, 'warn');
+  } finally {
+    document.getElementById('runBtn').disabled = false;
+  }
+}
+
+// ── Shared Tavily fetch with visible rate-limit handling ──────────────────────
+// ── Tavily key-pool rotation ──────────────────────────────────────────────────
+let _tavilyRateLimited = false;   // true when ALL keys are exhausted
+let _tavilyKeyIdx      = 0;       // index into the active pool
+let _tavilyExhausted   = new Set(); // indices of keys that hit their limit
+
+// Called once per runDiscovery() to reset rotation state
+function resetTavilyPool() {
+  const pool = getTavilyPool();
+  _tavilyRateLimited = false;
+  _tavilyKeyIdx      = 0;
+  _tavilyExhausted   = new Set();
+  logProgress(`🔑 Tavily pool: ${pool.length} key${pool.length !== 1 ? 's' : ''} loaded`);
+}
+
+async function tavilySearch(_unusedKey, query, depth = 'basic', maxResults = 10) {
+  if (_tavilyRateLimited) return null;
+
+  const pool = getTavilyPool();
+  if (!pool.length) {
+    logProgress('⚠️ No Tavily key configured — check ⚙️ Settings.', 'warn');
+    _tavilyRateLimited = true;
+    return null;
+  }
+
+  // Find the next non-exhausted key starting from _tavilyKeyIdx
+  let activeIdx = -1;
+  for (let i = _tavilyKeyIdx; i < pool.length; i++) {
+    if (!_tavilyExhausted.has(i)) { activeIdx = i; break; }
+  }
+  if (activeIdx === -1) {
+    _tavilyRateLimited = true;
+    logProgress('⚠️ All Tavily keys exhausted — add more keys in ⚙️ Settings.', 'warn');
+    return null;
+  }
+
+  const key = pool[activeIdx];
+  try {
+    const resp = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: key, query, search_depth: depth, max_results: maxResults, include_answer: false })
+    });
+
+    if (resp.status === 429 || resp.status === 401 || resp.status === 403) {
+      // Mark this key as exhausted and rotate to the next one
+      _tavilyExhausted.add(activeIdx);
+      _tavilyKeyIdx = activeIdx + 1;
+      const remaining = pool.length - _tavilyExhausted.size;
+      if (remaining > 0) {
+        logProgress(`⚠️ Tavily key ${activeIdx + 1} limit hit — rotating to key ${activeIdx + 2} of ${pool.length}...`, 'warn');
+        return tavilySearch(_unusedKey, query, depth, maxResults); // retry with next key
+      } else {
+        _tavilyRateLimited = true;
+        logProgress('⚠️ All Tavily keys exhausted — add more keys in ⚙️ Settings.', 'warn');
+        return null;
+      }
+    }
+    if (!resp.ok) {
+      logProgress(`⚠️ Tavily error ${resp.status} on: "${query.slice(0,60)}"`, 'warn');
+      return null;
+    }
+    return await resp.json();
+  } catch(e) {
+    return null;
+  }
+}
+
+// ── Tavily AI Search ─────────────────────────────────────────────────────────
+async function runTavily(city, state, depth) {
+  const key = getKey('tavily');
+  if (!key) { logProgress('⚠️ No Tavily key — skipping', 'warn'); return []; }
+
+  const baseQueries = [
+    `restaurant ${city} ${state} phone email contact`,
+    `cafe coffee shop ${city} ${state}`,
+    `bar pub brewery ${city} ${state}`,
+    `pizza bakery ${city} ${state}`,
+    `hair salon barber ${city} ${state}`,
+    `nail salon spa beauty ${city} ${state}`,
+    `gym fitness center ${city} ${state}`,
+    `yoga studio pilates ${city} ${state}`,
+    `auto repair mechanic ${city} ${state}`,
+    `dentist dental office ${city} ${state}`,
+    `doctor clinic medical ${city} ${state}`,
+    `chiropractor ${city} ${state}`,
+    `veterinarian vet clinic ${city} ${state}`,
+    `lawyer attorney law firm ${city} ${state}`,
+    `accountant CPA tax ${city} ${state}`,
+    `insurance agent ${city} ${state}`,
+    `real estate agent realtor ${city} ${state}`,
+    `plumber ${city} ${state}`,
+    `electrician ${city} ${state}`,
+    `HVAC heating cooling ${city} ${state}`,
+    `landscaping lawn care ${city} ${state}`,
+    `cleaning service maid ${city} ${state}`,
+    `dry cleaner laundromat ${city} ${state}`,
+    `florist flower shop ${city} ${state}`,
+    `pet grooming dog groomer ${city} ${state}`,
+    `daycare preschool childcare ${city} ${state}`,
+    `photography studio photographer ${city} ${state}`,
+    `tattoo parlor ${city} ${state}`,
+    `print shop sign shop ${city} ${state}`,
+  ];
+
+  const extraQueries = [
+    `mexican restaurant taqueria ${city} ${state}`,
+    `chinese restaurant ${city} ${state}`,
+    `thai restaurant ${city} ${state}`,
+    `italian restaurant ${city} ${state}`,
+    `indian restaurant ${city} ${state}`,
+    `japanese sushi restaurant ${city} ${state}`,
+    `korean restaurant ${city} ${state}`,
+    `vietnamese pho restaurant ${city} ${state}`,
+    `ice cream frozen yogurt ${city} ${state}`,
+    `fast food burger ${city} ${state}`,
+    `deli sandwich shop ${city} ${state}`,
+    `breakfast brunch restaurant ${city} ${state}`,
+    `steakhouse ${city} ${state}`,
+    `seafood restaurant ${city} ${state}`,
+    `auto body shop ${city} ${state}`,
+    `tire shop ${city} ${state}`,
+    `car wash ${city} ${state}`,
+    `pest control exterminator ${city} ${state}`,
+    `roofing contractor ${city} ${state}`,
+    `painting contractor ${city} ${state}`,
+    `moving company ${city} ${state}`,
+    `storage facility ${city} ${state}`,
+    `tutoring center learning ${city} ${state}`,
+    `music lessons ${city} ${state}`,
+    `dance studio ${city} ${state}`,
+    `martial arts karate taekwondo ${city} ${state}`,
+    `optometrist eye doctor ${city} ${state}`,
+    `pharmacy ${city} ${state}`,
+    `jewelry store ${city} ${state}`,
+    `clothing boutique ${city} ${state}`,
+    `furniture store ${city} ${state}`,
+    `hardware store ${city} ${state}`,
+    `smoke shop vape ${city} ${state}`,
+    `liquor store wine shop ${city} ${state}`,
+  ];
+
+  const queries = depth === 'standard'
+    ? baseQueries.slice(0, 10)
+    : depth === 'deep'
+    ? baseQueries
+    : [...baseQueries, ...extraQueries];
+
+  logProgress(`🔍 Tavily: running ${queries.length} queries...`);
+  const leads = [];
+
+  for (let i = 0; i < queries.length; i++) {
+    if (_tavilyRateLimited) break;
+    const data = await tavilySearch(key, queries[i]);
+    if (data) {
+      for (const r of (data.results || [])) {
+        const lead = parseTavilyResult(r, city, state);
+        if (lead) leads.push(lead);
+      }
+    }
+    setProgressBar(5 + Math.round((i/queries.length)*20), `🔍 Tavily: ${leads.length} leads (${i+1}/${queries.length})...`);
+    await sleep(150);
+  }
+
+  logProgress(`<span class="log-ok">✅ Tavily: ${leads.length} leads</span>`);
+  return leads;
+}
+
+function parseTavilyResult(r, city, state) {
+  const title   = (r.title || '').trim();
+  const url     = (r.url  || '').trim();
+  const snippet = (r.content || '').trim();
+  const combined = (title + ' ' + snippet).toLowerCase();
+
+  const bizKW = /restaurant|cafe|coffee|bar|pub|brewery|pizza|bakery|salon|barber|nail|spa|beauty|gym|fitness|yoga|auto|mechanic|tire|dentist|dental|doctor|clinic|medical|chiropract|vet|animal|lawyer|attorney|accountant|tax|insurance|real estate|realtor|plumb|electric|hvac|landscap|clean|dry clean|laundr|florist|flower|pet.*groom|daycare|preschool|photo|tattoo|print|sign|shop|store|boutique|repair|service|studio/i;
+  if (!bizKW.test(combined) && !bizKW.test(title)) return null;
+  if (title.length < 5) return null;
+
+  const emailM  = combined.match(/[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}/i);
+  const fbMatch = url.match(/facebook\.com\/[^/?#\s]+/) || combined.match(/facebook\.com\/[^/?#\s"]+/);
+  const igMatch = url.match(/instagram\.com\/[^/?#\s]+/) || combined.match(/instagram\.com\/[^/?#\s"]+/);
+
+  return {
+    name: title.slice(0, 120),
+    business_type: inferBusinessType(combined),
+    category: inferCategory(combined),
+    email: emailM ? emailM[0] : '',
+    phone: extractPhone(snippet),
+    website: url,
+    facebook: fbMatch ? 'https://' + fbMatch[0].replace(/^https?:\/\//, '') : '',
+    instagram: igMatch ? 'https://' + igMatch[0].replace(/^https?:\/\//, '') : '',
+    history: extractHistory(snippet),
+    notes: snippet.slice(0, 200),
+    source: 'tavily',
+    fans: 0,
+    ein: '',
+    city, state,
+    score: 0, priority: 'Medium', verified: !!(emailM)
+  };
+}
+
+// ── Instagram Search (via Tavily — finds public IG profiles) ─────────────────
+async function runInstagram(city, state, depth) {
+  const key = getKey('tavily');
+  if (!key) { logProgress('⚠️ No Tavily key — skipping Instagram', 'warn'); return []; }
+
+  const baseQueries = [
+    `site:instagram.com "${city}" restaurant food`,
+    `site:instagram.com "${city}" salon barber beauty`,
+    `site:instagram.com "${city}" gym fitness`,
+    `site:instagram.com "${city}" auto repair mechanic`,
+    `site:instagram.com "${city}" dentist dental`,
+    `site:instagram.com "${city}" cafe coffee shop`,
+    `site:instagram.com "${city}" bar brewery pub`,
+    `site:instagram.com "${city}" spa nail salon`,
+    `site:instagram.com "${city}" lawyer attorney`,
+  ];
+  const extraQueries = [
+    `site:instagram.com "${city}" pizza bakery`,
+    `site:instagram.com "${city}" plumber electrician HVAC`,
+    `site:instagram.com "${city}" real estate agent`,
+    `site:instagram.com "${city}" veterinarian pet grooming`,
+    `site:instagram.com "${city}" daycare preschool`,
+    `site:instagram.com "${city}" photography studio`,
+    `site:instagram.com "${city}" tattoo parlor`,
+    `site:instagram.com "${city}" florist flower shop`,
+    `site:instagram.com "${city}" landscaping lawn care`,
+    `site:instagram.com "${city}" cleaning service`,
+  ];
+
+  const queries = depth === 'standard' ? baseQueries.slice(0, 3)
+    : depth === 'deep' ? baseQueries
+    : [...baseQueries, ...extraQueries];
+
+  logProgress(`📷 Instagram: searching ${queries.length} queries...`);
+  const leads = [];
+
+  for (let i = 0; i < queries.length; i++) {
+    if (_tavilyRateLimited) break;
+    const data = await tavilySearch(key, queries[i]);
+    if (data) {
+      for (const r of (data.results || [])) {
+        const url = (r.url || '');
+        if (!url.includes('instagram.com')) continue;
+        const title   = (r.title || '').trim();
+        const snippet = (r.content || '').trim();
+        if (title.length < 4) continue;
+        const handleM = url.match(/instagram\.com\/([^/?#\s]+)/);
+        const handle  = handleM ? handleM[1] : '';
+        if (['p','reel','explore','tv','stories'].includes(handle)) continue;
+        const combined = (title + ' ' + snippet).toLowerCase();
+        leads.push({
+          name: title.slice(0, 120),
+          business_type: inferBusinessType(combined),
+          category: inferCategory(combined),
+          email: extractEmailFromText(snippet),
+          phone: extractPhone(snippet),
+          website: '',
+          facebook: '',
+          instagram: handle ? `https://instagram.com/${handle}` : url,
+          history: extractHistory(snippet),
+          notes: snippet.slice(0, 200),
+          source: 'instagram',
+          fans: 0, ein: '',
+          city, state,
+          score: 0, priority: 'Medium', verified: false
+        });
+      }
+    }
+    setProgressBar(8 + Math.round((i/queries.length)*15), `📷 Instagram: ${leads.length} profiles (${i+1}/${queries.length})...`);
+    await sleep(200);
+  }
+
+  logProgress(`<span class="log-ok">✅ Instagram: ${leads.length} profiles found</span>`);
+  return leads;
+}
+
+// ── Google Places v2 (New API — returns phone + website in one call) ──────────
+async function runGooglePlaces(city, state, depth) {
+  const key = getKey('google');
+  if (!key) { logProgress('⚠️ No Google key — skipping', 'warn'); return []; }
+
+  const baseQueries = [
+    `restaurant ${city} ${state}`,
+    `cafe coffee shop ${city} ${state}`,
+    `bar brewery ${city} ${state}`,
+    `hair salon barber ${city} ${state}`,
+    `gym fitness center ${city} ${state}`,
+    `auto repair mechanic ${city} ${state}`,
+    `dentist ${city} ${state}`,
+    `doctor clinic ${city} ${state}`,
+    `lawyer attorney ${city} ${state}`,
+    `plumber electrician ${city} ${state}`,
+    `pizza bakery ${city} ${state}`,
+    `nail salon spa ${city} ${state}`,
+    `real estate agent ${city} ${state}`,
+    `veterinarian ${city} ${state}`,
+  ];
+
+  const extraQueries = [
+    `chinese restaurant ${city} ${state}`,
+    `mexican restaurant ${city} ${state}`,
+    `japanese sushi ${city} ${state}`,
+    `thai restaurant ${city} ${state}`,
+    `indian restaurant ${city} ${state}`,
+    `italian restaurant ${city} ${state}`,
+    `ice cream dessert ${city} ${state}`,
+    `fast food burger ${city} ${state}`,
+    `yoga studio ${city} ${state}`,
+    `martial arts ${city} ${state}`,
+    `chiropractor ${city} ${state}`,
+    `accountant tax ${city} ${state}`,
+    `insurance agent ${city} ${state}`,
+    `dry cleaner ${city} ${state}`,
+    `florist ${city} ${state}`,
+    `pet grooming ${city} ${state}`,
+    `daycare ${city} ${state}`,
+    `photography studio ${city} ${state}`,
+    `tattoo parlor ${city} ${state}`,
+    `landscaping ${city} ${state}`,
+    `cleaning service ${city} ${state}`,
+    `HVAC ${city} ${state}`,
+    `roofing contractor ${city} ${state}`,
+    `optometrist ${city} ${state}`,
+  ];
+
+  const queries = depth === 'standard'
+    ? baseQueries.slice(0, 8)
+    : depth === 'deep'
+    ? baseQueries
+    : [...baseQueries, ...extraQueries];
+
+  const pages = depth === 'max' ? 3 : depth === 'deep' ? 2 : 1;
+
+  logProgress(`🗺️ Google Places v2: ${queries.length} queries × ${pages} pages...`);
+  const leads = [];
+  const seenIds = new Set();
+
+  for (let qi = 0; qi < queries.length; qi++) {
+    const query = queries[qi];
+    let pageToken = null;
+    let pageNum = 0;
+
+    do {
+      try {
+        const body = { textQuery: query, maxResultCount: 20 };
+        if (pageToken) body.pageToken = pageToken;
+
+        const resp = await fetch('https://places.googleapis.com/v1/places:searchText', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': key,
+            'X-Goog-FieldMask': 'places.id,places.displayName,places.nationalPhoneNumber,places.websiteUri,places.formattedAddress,places.types'
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          logProgress(`⚠️ Google Places: ${err?.error?.message || resp.status}`, 'warn');
+          break;
+        }
+        const data = await resp.json();
+
+        for (const place of (data.places || [])) {
+          if (seenIds.has(place.id)) continue;
+          seenIds.add(place.id);
+          const lead = parsePlaceResult(place, city, state);
+          if (lead) leads.push(lead);
+        }
+
+        pageToken = data.nextPageToken || null;
+        if (pageToken) await sleep(2000);
+      } catch(e) { break; }
+
+      pageNum++;
+    } while (pageToken && pageNum < pages);
+
+    setProgressBar(25 + Math.round((qi/queries.length)*35), `🗺️ Google: ${leads.length} places found...`);
+    await sleep(200);
+  }
+
+  logProgress(`<span class="log-ok">✅ Google Places: ${leads.length} leads</span>`);
+  return leads;
+}
+
+function parsePlaceResult(place, city, state) {
+  // Supports new Places API v2 response format
+  const name = (place.displayName?.text || place.name || '').trim();
+  if (!name || name.length < 3) return null;
+  const types = (place.types || []).join(' ');
+  // DO NOT filter any types - we want ALL businesses
+
+  const addr = place.formattedAddress || place.formatted_address || '';
+  return {
+    name: name.slice(0, 120),
+    business_type: inferBusinessType(name.toLowerCase() + ' ' + types),
+    category: inferCategory(name.toLowerCase() + ' ' + types),
+    email: '',
+    phone: place.nationalPhoneNumber || place.formatted_phone_number || '',
+    website: place.websiteUri || place.website || '',
+    facebook: '',
+    instagram: '',
+    history: '',
+    address: addr,
+    notes: addr,
+    source: 'google_places',
+    fans: 0,
+    ein: '',
+    city, state,
+    score: 0, priority: 'Medium', verified: false
+  };
+}
+
+// ── Yelp Search (via Tavily — avoids CORS, returns phone data) ───────────────
+async function runYelp(city, state, depth) {
+  const key = getKey('tavily');
+  if (!key) { logProgress('⚠️ No Tavily key — skipping Yelp', 'warn'); return []; }
+
+  const baseQueries = [
+    `site:yelp.com/biz "${city}" restaurant`,
+    `site:yelp.com/biz "${city}" hair salon barber`,
+    `site:yelp.com/biz "${city}" auto repair mechanic`,
+    `site:yelp.com/biz "${city}" dentist doctor clinic`,
+    `site:yelp.com/biz "${city}" gym fitness yoga`,
+    `site:yelp.com/biz "${city}" cafe coffee shop bakery`,
+  ];
+  const extraQueries = [
+    `site:yelp.com/biz "${city}" plumber electrician HVAC`,
+    `site:yelp.com/biz "${city}" lawyer attorney`,
+    `site:yelp.com/biz "${city}" nail salon spa`,
+    `site:yelp.com/biz "${city}" veterinarian pet grooming`,
+    `site:yelp.com/biz "${city}" real estate agent`,
+    `site:yelp.com/biz "${city}" insurance accountant`,
+    `site:yelp.com/biz "${city}" landscaping cleaning service`,
+    `site:yelp.com/biz "${city}" pizza sushi chinese food`,
+    `site:yelp.com/biz "${city}" tattoo parlor photography`,
+    `site:yelp.com/biz "${city}" daycare tutoring`,
+  ];
+
+  const queries = depth === 'standard' ? baseQueries.slice(0, 2)
+    : depth === 'deep' ? baseQueries
+    : [...baseQueries, ...extraQueries];
+
+  logProgress(`🟥 Yelp: searching ${queries.length} queries...`);
+  const leads = [];
+  const seenNames = new Set();
+
+  for (let i = 0; i < queries.length; i++) {
+    if (_tavilyRateLimited) break;
+    const data = await tavilySearch(key, queries[i]);
+    if (data) {
+      for (const r of (data.results || [])) {
+        const url = (r.url || '');
+        if (!url.includes('yelp.com/biz')) continue;
+        const title = (r.title || '').replace(/ - Yelp$/, '').replace(/ \(.*?\)$/, '').trim();
+        const snippet = (r.content || '').trim();
+        if (title.length < 4) continue;
+        const nameKey = title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+        if (seenNames.has(nameKey)) continue;
+        seenNames.add(nameKey);
+        const combined = (title + ' ' + snippet).toLowerCase();
+        leads.push({
+          name: title.slice(0, 120),
+          business_type: inferBusinessType(combined),
+          category: inferCategory(combined),
+          email: extractEmailFromText(snippet),
+          phone: extractPhone(snippet),
+          website: '',
+          facebook: '', instagram: '',
+          history: extractHistory(snippet),
+          notes: snippet.slice(0, 200),
+          source: 'yelp',
+          fans: 0, ein: '',
+          city, state,
+          score: 0, priority: 'Medium', verified: false
+        });
+      }
+    }
+    setProgressBar(60 + Math.round((i / queries.length) * 10), `🟥 Yelp: ${leads.length} found (${i+1}/${queries.length})...`);
+    await sleep(200);
+  }
+
+  logProgress(`<span class="log-ok">✅ Yelp: ${leads.length} leads found</span>`);
+  return leads;
+}
+
+// ── Yellow Pages (via Tavily — phone numbers in snippets) ────────────────────
+async function runYellowPages(city, state, depth) {
+  const key = getKey('tavily');
+  if (!key) { logProgress('⚠️ No Tavily key — skipping Yellow Pages', 'warn'); return []; }
+
+  const baseQueries = [
+    `site:yellowpages.com "${city}, ${state}" restaurant`,
+    `site:yellowpages.com "${city}, ${state}" hair salon barber`,
+    `site:yellowpages.com "${city}, ${state}" auto repair`,
+    `site:yellowpages.com "${city}, ${state}" dentist`,
+    `site:yellowpages.com "${city}, ${state}" gym fitness`,
+    `site:yellowpages.com "${city}, ${state}" cafe coffee`,
+    `site:yellowpages.com "${city}, ${state}" plumber electrician`,
+    `site:yellowpages.com "${city}, ${state}" lawyer attorney`,
+  ];
+  const extraQueries = [
+    `site:yellowpages.com "${city}, ${state}" nail salon spa`,
+    `site:yellowpages.com "${city}, ${state}" veterinarian`,
+    `site:yellowpages.com "${city}, ${state}" real estate agent`,
+    `site:yellowpages.com "${city}, ${state}" insurance agent`,
+    `site:yellowpages.com "${city}, ${state}" accountant CPA`,
+    `site:yellowpages.com "${city}, ${state}" landscaping lawn`,
+    `site:yellowpages.com "${city}, ${state}" cleaning service`,
+    `site:yellowpages.com "${city}, ${state}" HVAC heating cooling`,
+    `site:yellowpages.com "${city}, ${state}" roofing contractor`,
+    `site:yellowpages.com "${city}, ${state}" pizza bakery`,
+    `site:yellowpages.com "${city}, ${state}" tattoo parlor`,
+    `site:yellowpages.com "${city}, ${state}" photography studio`,
+  ];
+
+  const queries = depth === 'standard' ? baseQueries.slice(0, 3)
+    : depth === 'deep' ? baseQueries
+    : [...baseQueries, ...extraQueries];
+
+  logProgress(`📒 Yellow Pages: searching ${queries.length} queries...`);
+  const leads = [];
+  const seenNames = new Set();
+
+  for (let i = 0; i < queries.length; i++) {
+    if (_tavilyRateLimited) break;
+    const data = await tavilySearch(key, queries[i]);
+    if (data) {
+      for (const r of (data.results || [])) {
+        const url = (r.url || '');
+        if (!url.includes('yellowpages.com')) continue;
+        const title   = (r.title || '').replace(/ - Yellow Pages$/, '').replace(/ - YP\.com$/, '').replace(/ \(.*?\)$/, '').trim();
+        const snippet = (r.content || '').trim();
+        if (title.length < 4) continue;
+        const nameKey = title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+        if (seenNames.has(nameKey)) continue;
+        seenNames.add(nameKey);
+        const combined = (title + ' ' + snippet).toLowerCase();
+        leads.push({
+          name: title.slice(0, 120),
+          business_type: inferBusinessType(combined),
+          category: inferCategory(combined),
+          email: extractEmailFromText(snippet),
+          phone: extractPhone(snippet),
+          website: '',
+          facebook: '', instagram: '',
+          history: extractHistory(snippet),
+          notes: snippet.slice(0, 200),
+          source: 'yellowpages',
+          fans: 0, ein: '',
+          city, state,
+          score: 0, priority: 'Medium', verified: false
+        });
+      }
+    }
+    setProgressBar(70 + Math.round((i / queries.length) * 8), `📒 YP: ${leads.length} found (${i+1}/${queries.length})...`);
+    await sleep(200);
+  }
+
+  logProgress(`<span class="log-ok">✅ Yellow Pages: ${leads.length} leads found</span>`);
+  return leads;
+}
+
+
+
+// ── Facebook Pages Search ─────────────────────────────────────────────────────
+async function runFacebook(city, state, depth) {
+  const token = getKey('facebook');
+  if (!token) {
+    logProgress('⚠️ No Facebook token — add it in ⚙️ Settings to search Facebook Pages', 'warn');
+    return [];
+  }
+
+  const baseQueries = [
+    `${city} restaurant food`,
+    `${city} hair salon barber`,
+    `${city} auto repair mechanic`,
+    `${city} dentist dental office`,
+    `${city} gym fitness center`,
+    `${city} cafe coffee shop`,
+    `${city} bar brewery pub`,
+    `${city} nail salon spa`,
+    `${city} lawyer attorney`,
+    `${city} plumber electrician`,
+    `${city} real estate agent`,
+    `${city} doctor clinic medical`,
+  ];
+
+  const extraQueries = [
+    `${city} veterinarian pet grooming`,
+    `${city} insurance agent`,
+    `${city} accountant CPA tax`,
+    `${city} landscaping lawn care`,
+    `${city} cleaning service maid`,
+    `${city} HVAC heating cooling`,
+    `${city} pizza bakery`,
+    `${city} daycare preschool`,
+    `${city} photography studio`,
+    `${city} tattoo parlor`,
+  ];
+
+  const queries = depth === 'standard'
+    ? baseQueries.slice(0, 4)
+    : depth === 'deep'
+    ? baseQueries
+    : [...baseQueries, ...extraQueries];
+
+  logProgress(`📘 Facebook: searching ${queries.length} queries...`);
+  const leads = [];
+
+  for (let i = 0; i < queries.length; i++) {
+    const query = queries[i];
+    try {
+      const fields = 'id,name,about,phone,website,location,category,fan_count,link';
+      const url = `https://graph.facebook.com/v18.0/pages/search?q=${encodeURIComponent(query)}&fields=${fields}&limit=10&access_token=${token}`;
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        if (err.error) logProgress(`⚠️ Facebook: ${err.error.message}`, 'warn');
+        continue;
+      }
+      const data = await resp.json();
+
+      for (const page of (data.data || [])) {
+        if (!page.name) continue;
+        const loc = page.location || {};
+        const pageCity = (loc.city || '').toLowerCase();
+        const searchCity = city.toLowerCase();
+        // Filter to same city/region
+        if (pageCity && pageCity !== searchCity && !pageCity.includes(searchCity.split(' ')[0])) continue;
+
+        leads.push({
+          name: page.name.slice(0, 120),
+          business_type: inferBusinessType((page.name + ' ' + (page.category || '') + ' ' + (page.about || '')).toLowerCase()),
+          category: inferCategory((page.name + ' ' + (page.category || '')).toLowerCase()),
+          email: extractEmailFromText(page.about || ''),
+          phone: page.phone || loc.zip ? (page.phone || '') : '',
+          website: page.website || '',
+          facebook: page.link || `https://facebook.com/${page.id}`,
+          instagram: '',
+          history: extractHistory(page.about || ''),
+          notes: page.about ? page.about.slice(0, 200) : (page.category || ''),
+          source: 'facebook',
+          fans: page.fan_count || 0,
+          ein: '',
+          city: loc.city || city, state: loc.state || state,
+          score: 0, priority: 'Medium', verified: !!(page.phone)
+        });
+      }
+    } catch(e) { logProgress(`⚠️ Facebook error: ${e.message}`, 'warn'); }
+
+    setProgressBar(65 + Math.round((i/queries.length)*20), `📘 Facebook: ${leads.length} pages (${i+1}/${queries.length})...`);
+    await sleep(300);
+  }
+
+  logProgress(`<span class="log-ok">✅ Facebook: ${leads.length} pages found</span>`);
+  return leads;
+}
+
+// ── Scoring ───────────────────────────────────────────────────────────────────
+function scoreLead(lead) {
+  let score = 30;
+  if (lead.email) score += 20;
+  if (lead.phone) score += 15;
+  if (lead.website && lead.source !== 'propublica') score += 8;
+  if (lead.facebook) score += 6;
+  if (lead.instagram) score += 5;
+  if (lead.fans > 500) score += 5;
+  if (lead.fans > 2000) score += 5;
+  if (lead.source === 'google_places') score += 10;
+  if (lead.source === 'facebook') score += 5;
+  if (lead.source === 'instagram') score += 3;
+  if (lead.source === 'yelp') score += 5;
+  if (lead.source === 'yellowpages') score += 5;
+  if (lead.verified) score += 5;
+  score = Math.min(score, 100);
+  lead.score = score;
+  lead.priority = score >= 78 ? 'Hot' : score >= 60 ? 'High' : score >= 38 ? 'Medium' : 'Low';
+  return lead;
+}
+
+// ── Inference helpers ─────────────────────────────────────────────────────────
+function inferBusinessType(t) {
+  if (/restaurant|cafe|coffee|diner|bistro|eatery/.test(t)) return 'Restaurant';
+  if (/salon|barber|hair|beauty|spa|massage|wellness/.test(t)) return 'Salon';
+  if (/gym|fitness|yoga|crossfit|boxing|pilates/.test(t)) return 'Fitness';
+  if (/auto|mechanic|tire|car wash|repair/.test(t)) return 'Auto Service';
+  if (/plumb|electric|hvac|heating|cooling|roofing|painting|cleaning|landscap/.test(t)) return 'Home Service';
+  if (/dentist|dental|doctor|medical|clinic|chiropract|vet|optom|pharmacy/.test(t)) return 'Health';
+  if (/lawyer|attorney|accountant|tax|insurance|real estate|realtor/.test(t)) return 'Professional';
+  if (/retail|shop|store|boutique|mall/.test(t)) return 'Retail';
+  if (/hotel|motel|lodge|inn/.test(t)) return 'Hospitality';
+  return 'Business';
+}
+function inferCategory(t) {
+  if (/restaurant|cafe|coffee|bar|pub|brewery|pizza|bakery|ice cream|sushi|taco|burger|deli|sandwich|steakhouse|seafood|fast food|diner|grill|eatery|food|bistro/i.test(t)) return 'Food & Drink';
+  if (/salon|barber|nail|beauty|spa|massage|wellness/i.test(t)) return 'Beauty & Wellness';
+  if (/gym|fitness|yoga|pilates|crossfit|martial art|boxing|karate/i.test(t)) return 'Fitness';
+  if (/auto|mechanic|tire|car wash|body shop|plumb|electric|hvac|landscap|clean|pest|roof|paint|moving/i.test(t)) return 'Auto & Home Services';
+  if (/dentist|dental|doctor|medical|clinic|chiropract|vet|optom|eye|pharmacy/i.test(t)) return 'Health & Medical';
+  if (/lawyer|attorney|accountant|tax|insurance|real estate|realtor/i.test(t)) return 'Professional Services';
+  return 'Retail & Other';
+}
+function extractPhone(t) {
+  const m = t.match(/(\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4})/);
+  return m ? m[1] : '';
+}
+function extractEmailFromText(t) {
+  if (!t) return '';
+  const m = t.match(/[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}/i);
+  return m ? m[0] : '';
+}
+function extractHistory(t) {
+  const pats = [
+    /raised \$[\d,]+[^\.\n]*/i,
+    /annual \w+ fundraiser[^\.\n]*/i,
+    /restaurant night[^\.\n]*/i,
+    /dine[\- ]out[^\.\n]*/i,
+    /fundrais\w+ event[^\.\n]*/i,
+  ];
+  for (const p of pats) { const m = (t||'').match(p); if (m) return m[0].slice(0, 120); }
+  return '';
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderResults(city, state) {
+  document.getElementById('metricsRow').style.display = 'grid';
+  document.getElementById('mTotal').textContent    = allLeads.length;
+  document.getElementById('mHot').textContent      = allLeads.filter(l => l.priority === 'Hot').length;
+  document.getElementById('mHigh').textContent     = allLeads.filter(l => l.priority === 'High').length;
+  document.getElementById('mEmail').textContent    = allLeads.filter(l => l.email).length;
+  document.getElementById('mFb').textContent       = allLeads.filter(l => l.source === 'facebook').length;
+
+  document.getElementById('mPhone').textContent    = allLeads.filter(l => l.phone).length;
+  document.getElementById('mIg').textContent       = allLeads.filter(l => l.source === 'instagram' || l.instagram).length;
+  document.getElementById('mYelp').textContent     = allLeads.filter(l => l.source === 'yelp').length;
+  document.getElementById('resultsTitle').textContent = `${allLeads.length} leads — ${city}, ${state}`;
+  filterLeads(currentFilter, null);
+  document.getElementById('resultsCard').classList.add('visible');
+  setProgress(false);
+}
+
+function filterLeads(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    const btns = document.querySelectorAll('.filter-btn');
+    if (filter === 'all') btns[0].classList.add('active');
+  }
+  if (filter === 'all')        filteredLeads = [...allLeads];
+  else if (filter === 'facebook')  filteredLeads = allLeads.filter(l => l.source === 'facebook');
+
+  else if (filter === 'instagram') filteredLeads = allLeads.filter(l => l.source === 'instagram' || l.instagram);
+  else if (filter === 'yelp')      filteredLeads = allLeads.filter(l => l.source === 'yelp');
+  else if (['Hot','High','Medium','Low'].includes(filter)) filteredLeads = allLeads.filter(l => l.priority === filter);
+  else filteredLeads = allLeads.filter(l => l.category === filter || l.category.startsWith(filter));
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('leadsBody');
+  tbody.innerHTML = '';
+  if (!filteredLeads.length) {
+    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:2rem;color:#718096">No leads match this filter</td></tr>`;
+    return;
+  }
+  filteredLeads.forEach((lead, idx) => {
+    // Social icons (links for existing verified URLs)
+    const socialIcons = [];
+    if (lead.website && lead.source !== 'propublica') socialIcons.push(`<a class="web-link" href="${esc(lead.website)}" target="_blank" title="${esc(lead.website)}">🌐</a>`);
+    if (lead.facebook) socialIcons.push(`<a class="fb-link" href="${esc(lead.facebook)}" target="_blank">📘${lead.fans > 0 ? ` <span class="fans-badge">${fmtFans(lead.fans)}</span>` : ''}</a>`);
+    if (lead.instagram) socialIcons.push(`<a style="color:#C13584;text-decoration:none;font-size:.75rem" href="${esc(lead.instagram)}" target="_blank">📷</a>`);
+    if (lead.ein) socialIcons.push(`<span class="source-badge" style="background:#e8fdf0;color:#2a7a4b" title="EIN: ${esc(lead.ein)}">📋 990</span>`);
+    const srcClass = `src-${lead.source}`;
+    const addrDisplay = lead.address || '';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="priority-badge p-${lead.priority}">${lead.priority}</span></td>
+      <td><div class="biz-name">${esc(lead.name)}</div><div class="biz-type">${esc(lead.business_type)}</div></td>
+      <td>${esc(lead.category)}</td>
+      <td style="color:var(--muted);font-size:0.78rem">${esc(lead.city||'')}</td>
+      <td><input class="res-input" id="res-email-${idx}" type="email" value="${esc(lead.email||'')}" placeholder="email…" oninput="filteredLeads[${idx}].email=this.value" title="${esc(lead.email||'')}"></td>
+      <td><input class="res-input" id="res-phone-${idx}" type="tel" value="${esc(lead.phone||'')}" placeholder="phone…" oninput="filteredLeads[${idx}].phone=this.value"></td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          ${socialIcons.length ? `<div style="white-space:nowrap">${socialIcons.join(' ')}</div>` : ''}
+          <input class="res-input" id="res-fb-${idx}" type="url" value="${esc(lead.facebook||'')}" placeholder="fb url…" oninput="filteredLeads[${idx}].facebook=this.value" style="font-size:0.7rem">
+          <input class="res-input" id="res-ig-${idx}" type="url" value="${esc(lead.instagram||'')}" placeholder="ig url…" oninput="filteredLeads[${idx}].instagram=this.value" style="font-size:0.7rem">
+        </div>
+      </td>
+      <td style="font-size:0.75rem;color:var(--muted)" title="${esc(addrDisplay)}">${addrDisplay ? `<div style="overflow:hidden;max-height:2.5em">${esc(addrDisplay)}</div>` : '<span style="color:#cbd5e0">—</span>'}</td>
+      <td><div class="history-cell" title="${esc(lead.history)||''}">${esc(lead.history) || '<span style="color:#cbd5e0">—</span>'}</div></td>
+      <td><span class="source-badge ${srcClass}">${srcLabel(lead.source)}</span></td>
+      <td><textarea class="notes-input" rows="1" placeholder="notes…" onblur="updateLeadNotes(${idx},this.value)">${esc(lead.notes||'')}</textarea></td>
+      <td><button class="enrich-cell" id="enrich-${idx}" onclick="enrichSingle(${idx})">${(lead.email&&lead.phone)?'✅':'🔍 Fill'}</button></td>
+      <td><button class="script-btn" onclick="showScript(${idx})">📝</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Update editable result fields after enrichment
+function updateResultRow(idx) {
+  const lead = filteredLeads[idx];
+  if (!lead) return;
+  const emailIn = document.getElementById(`res-email-${idx}`);
+  const phoneIn = document.getElementById(`res-phone-${idx}`);
+  const fbIn    = document.getElementById(`res-fb-${idx}`);
+  const igIn    = document.getElementById(`res-ig-${idx}`);
+  if (emailIn) emailIn.value = lead.email  || '';
+  if (phoneIn) phoneIn.value = lead.phone  || '';
+  if (fbIn)    fbIn.value    = lead.facebook   || '';
+  if (igIn)    igIn.value    = lead.instagram  || '';
+  const enrichBtn = document.getElementById(`enrich-${idx}`);
+  if (enrichBtn) enrichBtn.textContent = (lead.email && lead.phone) ? '✅' : '🔍 Fill';
+}
+
+function srcLabel(s) {
+  const map = {
+    tavily:'Tavily', google_places:'Google', facebook:'Facebook',
+    instagram:'Instagram', yelp:'Yelp', yellowpages:'YellowPg'
+  };
+  return map[s] || s;
+}
+function fmtFans(n) {
+  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+  return String(n);
+}
+
+// ── Outreach Scripts ──────────────────────────────────────────────────────────
+function generateScript(lead) {
+  const org  = lead.name;
+  const city = lead.city;
+
+  if (lead.category === 'Schools') {
+    return `Hi! 👋 I'm Kris from ThinkNLocal. We help PTAs and booster clubs in ${city} run easy restaurant fundraiser nights — you promote the event, the restaurant donates a % of sales, and your group collects a check. Most groups raise $500–$1,500 per night with zero upfront cost. We handle ALL the coordination!\n\nWould love to connect with whoever handles fundraisers for ${org}. Reply here or DM us to learn more! 🍽️\n\n— Kris @ ThinkNLocal`;
+  }
+  if (lead.category === 'Sports') {
+    return `Hi! ⚽ I'm Kris from ThinkNLocal. We run restaurant fundraiser nights for youth sports leagues in ${city} — easy money for uniforms, travel, and equipment. Your team promotes the event, the restaurant donates a % of sales, and you collect a check. Groups typically raise $300–$1,500 per night, and we handle ALL the logistics!\n\nWould love to chat with whoever handles fundraising for ${org}. DM us to learn more!\n\n— Kris @ ThinkNLocal`;
+  }
+  if (lead.category === 'Faith') {
+    return `Hi! 🙏 I'm Kris from ThinkNLocal. We help faith communities in ${city} raise funds through restaurant fundraiser nights — your congregation promotes the event, the restaurant donates a %, and your community collects a check. Zero cost to you, and we handle everything.\n\nWould love to share how it works for ${org}. Reply or DM us! 🍽️\n\n— Kris @ ThinkNLocal`;
+  }
+  if (lead.ein) {
+    return `Hi! 👋 I'm Kris from ThinkNLocal. We help nonprofits in ${city} raise additional funds through restaurant fundraiser nights — your org promotes the event, the restaurant donates a % of sales, and you collect a check. Zero upfront cost and we handle all coordination.\n\nWould love to connect about a fundraiser night for ${org}. Reply or DM us! 🍽️\n\n— Kris @ ThinkNLocal`;
+  }
+  return `Hi! 👋 I'm Kris from ThinkNLocal. We help local organizations in ${city} raise money through restaurant fundraiser nights — your group promotes the event, the restaurant donates a % of sales, and you collect a check. We handle everything and it costs nothing upfront. Groups earn $300–$1,500 per event!\n\nWould love to share more about how it works for ${org}. Reply or DM us! 🍽️\n\n— Kris @ ThinkNLocal`;
+}
+
+function showScript(idx) {
+  const lead = filteredLeads[idx];
+  document.getElementById('modalTitle').textContent = `Outreach Script — ${lead.name}`;
+  document.getElementById('modalSub').textContent = `${lead.business_type} · ${lead.city}, ${lead.state}`;
+  document.getElementById('modalScript').value = generateScript(lead);
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('visible');
+}
+function copyScript() {
+  const ta = document.getElementById('modalScript');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).catch(() => document.execCommand('copy'));
+  document.querySelector('.btn-copy').textContent = '✅ Copied!';
+  setTimeout(() => document.querySelector('.btn-copy').textContent = '📋 Copy', 2000);
+}
+
+// ── CSV Export ────────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!filteredLeads.length) return;
+  const cols = ['Priority','Score','Organization','Business Type','Category','Email','Phone','Website','Facebook','Instagram','EIN','Fundraiser History','Source','Facebook Fans','City','State','Notes'];
+  const rows = filteredLeads.map(l => [
+    l.priority, l.score, l.name, l.business_type, l.category,
+    l.email, l.phone, l.website, l.facebook, l.instagram,
+    l.ein, l.history, l.source, l.fans,
+    l.city, l.state, (l.notes||'').replace(/\n/g,' ')
+  ].map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(','));
+
+  const csv = [cols.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `LocalBizReach_${document.getElementById('cityInput').value.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Progress helpers ───────────────────────────────────────────────────────────
+function setProgress(visible) {
+  document.getElementById('progressArea').classList.toggle('visible', visible);
+  if (visible) document.getElementById('progressLog').innerHTML = '';
+}
+function setProgressBar(pct, msg) {
+  document.getElementById('progressBar').style.width = Math.min(pct, 100) + '%';
+  if (msg) {
+    document.getElementById('progressTitle').textContent = msg.replace(/<[^>]+>/g, '');
+    logProgress(msg);
+  }
+}
+function logProgress(msg, type) {
+  const div = document.getElementById('progressLog');
+  const line = document.createElement('div');
+  line.innerHTML = type === 'warn' ? `<span class="log-warn">${msg}</span>` : msg;
+  div.appendChild(line);
+  div.scrollTop = div.scrollHeight;
+}
+
+// ── Settings ───────────────────────────────────────────────────────────────────
+function toggleSettings() {
+  const panel = document.getElementById('settingsPanel');
+  panel.classList.toggle('visible');
+  if (panel.classList.contains('visible')) {
+    document.getElementById('set-tavily').value   = getKey('tavily');
+    document.getElementById('set-tavily2').value  = getKey('tavily2');
+    document.getElementById('set-tavily3').value  = getKey('tavily3');
+    document.getElementById('set-tavily4').value  = getKey('tavily4');
+    document.getElementById('set-google').value   = getKey('google');
+    document.getElementById('set-facebook').value = getKey('facebook');
+    document.getElementById('set-yelp').value     = getKey('yelp');
+    // Pre-fill App ID if stored
+    const savedAppId = localStorage.getItem('lbr_fb_appid') || '';
+    document.getElementById('set-fb-appid').value = savedAppId;
+    // Load Hunter.io + Supabase keys
+    document.getElementById('set-hunter').value  = localStorage.getItem('lbr_key_hunter') || '';
+    document.getElementById('set-sb-url').value  = localStorage.getItem('lbr_sb_url')     || DEFAULT_SB.url;
+    document.getElementById('set-sb-anon').value = localStorage.getItem('lbr_sb_anon')    || DEFAULT_SB.anon;
+    document.getElementById('set-ghl').value     = localStorage.getItem('lbr_key_ghl')    || DEFAULT_GHL_KEY;
+    updateExpiryBadge();
+  }
+}
+function saveSettings() {
+  const prevFbToken = localStorage.getItem('lbr_key_facebook') || '';
+  const newFbToken  = document.getElementById('set-facebook').value.trim();
+  localStorage.setItem('lbr_key_tavily',   document.getElementById('set-tavily').value.trim());
+  localStorage.setItem('lbr_key_tavily2',  document.getElementById('set-tavily2').value.trim());
+  localStorage.setItem('lbr_key_tavily3',  document.getElementById('set-tavily3').value.trim());
+  localStorage.setItem('lbr_key_tavily4',  document.getElementById('set-tavily4').value.trim());
+  localStorage.setItem('lbr_key_google',   document.getElementById('set-google').value.trim());
+  localStorage.setItem('lbr_key_facebook', newFbToken);
+  localStorage.setItem('lbr_key_yelp',     document.getElementById('set-yelp').value.trim());
+  localStorage.setItem('lbr_key_hunter',   document.getElementById('set-hunter').value.trim());
+  localStorage.setItem('lbr_key_ghl',     document.getElementById('set-ghl').value.trim());
+  const sbUrl  = document.getElementById('set-sb-url').value.trim();
+  const sbAnon = document.getElementById('set-sb-anon').value.trim();
+  localStorage.setItem('lbr_sb_url',  sbUrl);
+  localStorage.setItem('lbr_sb_anon', sbAnon);
+  const appId = document.getElementById('set-fb-appid').value.trim();
+  if (appId) localStorage.setItem('lbr_fb_appid', appId);
+  // Update Supabase notice
+  updateDbNotice();
+  // Track token save timestamp when token is newly set
+  if (newFbToken && newFbToken !== prevFbToken) {
+    localStorage.setItem('lbr_token_fb_saved_at', Date.now().toString());
+  }
+  updateExpiryBadge();
+  document.getElementById('savedMsg').style.display = 'block';
+  setTimeout(() => document.getElementById('savedMsg').style.display = 'none', 2500);
+}
+
+// ── Token Expiry Management ────────────────────────────────────────────────────
+function initTokenExpiry() {
+  updateExpiryBadge();
+  // Update badge every 60 minutes
+  setInterval(updateExpiryBadge, 3600000);
+}
+
+function updateExpiryBadge() {
+  const token   = getKey('facebook');
+  const savedAt = parseInt(localStorage.getItem('lbr_token_fb_saved_at') || '0');
+  const badge   = document.getElementById('tokenExpiryBadge');
+  const infoEl  = document.getElementById('fb-expiry-info');
+
+  if (!token) {
+    badge.style.display = 'none';
+    if (infoEl) { infoEl.style.display = 'none'; }
+    return;
+  }
+
+  if (!savedAt) {
+    // Token exists but no timestamp — assume it was just set (short-lived warning)
+    badge.className = 'token-expiry-badge token-expiry-warn';
+    badge.textContent = '📘 FB Token: ⚠️ Expiry Unknown';
+    badge.style.display = 'block';
+    if (infoEl) {
+      infoEl.style.display = 'block';
+      infoEl.style.background = '#fff3cd';
+      infoEl.style.color = '#856404';
+      infoEl.textContent = '⚠️ Expiry unknown. Use Extend Token to get a 60-day token.';
+    }
+    return;
+  }
+
+  const daysSaved = (Date.now() - savedAt) / 86400000;
+  const daysLeft  = Math.max(0, Math.round(60 - daysSaved));
+
+  badge.style.display = 'block';
+
+  if (daysLeft <= 0) {
+    badge.className = 'token-expiry-badge token-expiry-danger';
+    badge.textContent = '📘 FB Token: 🔴 EXPIRED — click to renew';
+    if (infoEl) {
+      infoEl.style.display = 'block';
+      infoEl.style.background = '#fce4e4';
+      infoEl.style.color = '#c0392b';
+      infoEl.textContent = '🔴 Token EXPIRED. Facebook searches will fail. Use Extend Token below.';
+    }
+  } else if (daysLeft <= 7) {
+    badge.className = 'token-expiry-badge token-expiry-danger';
+    badge.textContent = `📘 FB Token: ⚠️ ${daysLeft}d left — click to renew`;
+    if (infoEl) {
+      infoEl.style.display = 'block';
+      infoEl.style.background = '#fff3cd';
+      infoEl.style.color = '#856404';
+      infoEl.textContent = `⚠️ Token expires in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}. Extend it now!`;
+    }
+  } else if (daysLeft <= 14) {
+    badge.className = 'token-expiry-badge token-expiry-warn';
+    badge.textContent = `📘 FB Token: ${daysLeft}d left`;
+    if (infoEl) {
+      infoEl.style.display = 'block';
+      infoEl.style.background = '#fff3cd';
+      infoEl.style.color = '#856404';
+      infoEl.textContent = `⏳ Token expires in ${daysLeft} days. Consider extending soon.`;
+    }
+  } else {
+    badge.className = 'token-expiry-badge token-expiry-ok';
+    badge.textContent = `📘 FB Token: ✅ ${daysLeft}d left`;
+    if (infoEl) {
+      infoEl.style.display = 'block';
+      infoEl.style.background = '#d4edda';
+      infoEl.style.color = '#155724';
+      infoEl.textContent = `✅ Token valid for ~${daysLeft} more days.`;
+    }
+  }
+}
+
+async function extendToken() {
+  const appId     = document.getElementById('set-fb-appid').value.trim();
+  const appSecret = document.getElementById('set-fb-appsecret').value.trim();
+  const token     = document.getElementById('set-facebook').value.trim() || getKey('facebook');
+  const msgEl     = document.getElementById('extendMsg');
+
+  if (!appId || !appSecret || !token) {
+    msgEl.style.display = 'block';
+    msgEl.style.color = '#c0392b';
+    msgEl.textContent = '❌ Enter App ID, App Secret, and make sure the token is filled in above.';
+    return;
+  }
+
+  msgEl.style.display = 'block';
+  msgEl.style.color = '#856404';
+  msgEl.textContent = '⏳ Exchanging token...';
+
+  try {
+    const url = `https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=${encodeURIComponent(appId)}&client_secret=${encodeURIComponent(appSecret)}&fb_exchange_token=${encodeURIComponent(token)}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if (data.access_token) {
+      document.getElementById('set-facebook').value = data.access_token;
+      localStorage.setItem('lbr_key_facebook', data.access_token);
+      localStorage.setItem('lbr_token_fb_saved_at', Date.now().toString());
+      localStorage.setItem('lbr_fb_appid', appId); // remember App ID for next time
+      updateExpiryBadge();
+      msgEl.style.color = '#155724';
+      msgEl.textContent = '✅ Long-lived token saved! Good for ~60 days.';
+      // Clear sensitive fields
+      document.getElementById('set-fb-appsecret').value = '';
+    } else {
+      const errMsg = data.error ? data.error.message : 'Unknown error';
+      msgEl.style.color = '#c0392b';
+      msgEl.textContent = `❌ ${errMsg}`;
+    }
+  } catch(e) {
+    msgEl.style.color = '#c0392b';
+    msgEl.textContent = `❌ Network error: ${e.message}`;
+  }
+}
+function updateChip(name) {
+  const checked = document.getElementById('src-' + name).checked;
+  document.getElementById('chip-' + name).classList.toggle('off', !checked);
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Supabase Helpers ───────────────────────────────────────────────────────────
+function getSbKey(name) {
+  if (name === 'url')  return localStorage.getItem('lbr_sb_url')  || DEFAULT_SB.url;
+  if (name === 'anon') return localStorage.getItem('lbr_sb_anon') || DEFAULT_SB.anon;
+  return '';
+}
+
+function updateDbNotice() {
+  const notice = document.getElementById('dbNotice');
+  if (!notice) return;
+  // getSbKey now always returns a value (defaults to DEFAULT_SB), so always hide notice
+  notice.style.display = 'none';
+}
+
+// ── Tab Switching ──────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('view-search').style.display   = tab === 'search'   ? 'block' : 'none';
+  document.getElementById('view-pipeline').style.display = tab === 'pipeline' ? 'block' : 'none';
+  document.querySelectorAll('.view-tab').forEach(el => el.classList.remove('active'));
+  const activeTab = document.querySelector(`.view-tab[onclick*="${tab}"]`);
+  if (activeTab) activeTab.classList.add('active');
+  if (tab === 'pipeline') {
+    updateDbNotice();
+    loadPipeline();
+  }
+}
+
+// ── Supabase CRUD ──────────────────────────────────────────────────────────────
+async function sbFetch(path, method, body) {
+  const url  = getSbKey('url');
+  const anon = getSbKey('anon');
+  if (!url || !anon) return null;
+  const opts = {
+    method: method || 'GET',
+    headers: {
+      'apikey': anon,
+      'Authorization': `Bearer ${anon}`,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'resolution=merge-duplicates,return=minimal' : 'return=representation'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const resp = await fetch(`${url}/rest/v1/${path}`, opts);
+    if (method === 'POST' || method === 'PATCH') return { ok: resp.ok, status: resp.status };
+    const data = await resp.json();
+    return data;
+  } catch(e) {
+    console.error('Supabase error:', e);
+    return null;
+  }
+}
+
+async function saveAllToDb() {
+  if (!filteredLeads.length) { alert('No leads to save. Run a search first.'); return; }
+  const sbUrl  = getSbKey('url');
+  const sbAnon = getSbKey('anon');
+  if (!sbUrl || !sbAnon) {
+    alert('Supabase not configured. Go to ⚙️ Settings and add your Supabase URL + Anon Key.');
+    return;
+  }
+  const btn = document.getElementById('saveDbBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Checking existing...'; }
+
+  const headers = {
+    'apikey': sbAnon,
+    'Authorization': `Bearer ${sbAnon}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+  };
+
+  try {
+    // ── Step 1: Fetch existing name/city/state keys from Supabase ─────────────
+    // Dedup client-side to completely avoid the functional-index conflict issue.
+    // Paginate existing key fetch so dedup works even beyond 10k rows
+    const existHeaders = { 'apikey': sbAnon, 'Authorization': `Bearer ${sbAnon}` };
+    let existingAll = [], exOffset = 0;
+    while (true) {
+      const er = await fetch(`${sbUrl}/rest/v1/localbizreach_leads?select=name,city,state&limit=1000&offset=${exOffset}`, { headers: existHeaders });
+      const pg = er.ok ? await er.json() : [];
+      existingAll = existingAll.concat(pg || []);
+      if (!pg || pg.length < 1000) break;
+      exOffset += 1000;
+    }
+    const existingKeys = new Set(existingAll.map(r =>
+      `${(r.name||'').toLowerCase().trim()}|||${(r.city||'').toLowerCase().trim()}|||${(r.state||'').toLowerCase().trim()}`
+    ));
+
+    // ── Step 2: Build rows, split into new vs already-in-pipeline ─────────────
+    const rows = filteredLeads.map(l => ({
+      name:               (l.name     || '').trim(),
+      business_type:           l.business_type   || '',
+      category:           l.category  || '',
+      email:              l.email     || '',
+      phone:              l.phone     || '',
+      website:            l.website   || '',
+      facebook:           l.facebook  || '',
+      instagram:          l.instagram || '',
+      ein:                l.ein       || '',
+      fundraiser_history: l.fundraiserHistory || l.history || '',
+      source:             l.source    || '',
+      fans:               l.fans      || 0,
+      city:               (l.city     || '').trim(),
+      state:              (l.state    || '').trim(),
+      notes:              l.notes || l.address || '',
+      score:              l.score     || 0,
+      priority:           l.priority  || 'Medium',
+      verified:           !!l.verified,
+      status:             l.status    || 'New'
+    }));
+
+    const dedupeKey = r => `${r.name.toLowerCase().trim()}|||${r.city.toLowerCase().trim()}|||${r.state.toLowerCase().trim()}`;
+
+    // Dedup against DB, then dedup within the batch itself
+    // (multiple sources can find the same org with slightly different names that
+    //  pass in-memory dedup but collide on the DB's lower() functional index)
+    const seenInBatch = new Set();
+    const newRows = rows.filter(r => {
+      const k = dedupeKey(r);
+      if (existingKeys.has(k) || seenInBatch.has(k)) return false;
+      seenInBatch.add(k);
+      return true;
+    });
+    const existingRows = rows.filter(r => existingKeys.has(dedupeKey(r)));
+
+    // ── Step 3: Insert genuinely new leads — bulletproof batch w/ row fallback ──
+    let inserted = 0;
+    if (newRows.length > 0) {
+      if (btn) btn.textContent = `⏳ Inserting ${newRows.length} new leads...`;
+      const BATCH = 50;
+      for (let i = 0; i < newRows.length; i += BATCH) {
+        const batch = newRows.slice(i, i + BATCH);
+        const resp = await fetch(`${sbUrl}/rest/v1/localbizreach_leads`, {
+          method: 'POST', headers, body: JSON.stringify(batch)
+        });
+        if (resp.ok) {
+          inserted += batch.length;
+        } else if (resp.status === 409 || resp.status === 400 || resp.status === 422) {
+          // Batch hit a duplicate — fall back to one-by-one, silently skip conflicts
+          for (const row of batch) {
+            const r = await fetch(`${sbUrl}/rest/v1/localbizreach_leads`, {
+              method: 'POST', headers, body: JSON.stringify([row])
+            });
+            if (r.ok) inserted++;
+            // 409 = already exists → skip silently; any other error → also skip
+          }
+        } else {
+          const errText = await resp.text().catch(() => '');
+          throw new Error(`Insert failed (${resp.status}): ${errText.slice(0, 300)}`);
+        }
+        if (btn) btn.textContent = `⏳ Inserted ${inserted}/${newRows.length}...`;
+      }
+    }
+
+    // ── Step 4: PATCH existing leads — fill empty fields, preserve manual edits
+    let updated = 0;
+    const toUpdate = existingRows.filter(r => r.email || r.phone || r.website || r.facebook || r.instagram || r.ein);
+    if (btn && toUpdate.length) btn.textContent = `⏳ Updating ${toUpdate.length} existing leads...`;
+    for (const row of toUpdate) {
+      const patch = { updated_at: new Date().toISOString() };
+      ['email','phone','website','facebook','instagram','ein'].forEach(f => { if (row[f]) patch[f] = row[f]; });
+      if (row.score) patch.score = row.score;
+      const nEnc = encodeURIComponent(row.name);
+      const cEnc = encodeURIComponent(row.city);
+      const sEnc = encodeURIComponent(row.state);
+      await fetch(`${sbUrl}/rest/v1/localbizreach_leads?name=eq.${nEnc}&city=eq.${cEnc}&state=eq.${sEnc}`, {
+        method: 'PATCH', headers, body: JSON.stringify(patch)
+      }).catch(() => {});
+      updated++;
+      if (updated % 25 === 0) await sleep(50);
+    }
+
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Save to Pipeline'; }
+    const parts = [];
+    if (inserted) parts.push(`${inserted} new leads added`);
+    if (updated)  parts.push(`${updated} existing updated`);
+    if (!inserted && !updated) parts.push(`all ${rows.length} leads already in pipeline`);
+    alert(`✅ Done! ${parts.join(', ')}.`);
+
+  } catch(e) {
+    console.error('Save error:', e);
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Save to Pipeline'; }
+    alert(`❌ Save failed: ${e.message}`);
+  }
+}
+
+async function loadPipeline() {
+  const url  = getSbKey('url');
+  const anon = getSbKey('anon');
+  if (!url || !anon) return;
+
+  const tbody = document.getElementById('pipelineBody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:#666">⏳ Loading from Supabase...</td></tr>';
+
+  // Paginate in batches of 1000 (Supabase max) until we have everything
+  const PAGE = 1000;
+  let allData = [];
+  let offset  = 0;
+  while (true) {
+    const page = await sbFetch(`localbizreach_leads?order=score.desc&limit=${PAGE}&offset=${offset}`, 'GET');
+    if (!page || !Array.isArray(page)) {
+      if (!allData.length) {
+        if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:#c0392b">❌ Could not load. Check Supabase config and make sure the table exists.</td></tr>';
+        return;
+      }
+      break;
+    }
+    allData = allData.concat(page);
+    if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:2rem;color:#666">⏳ Loaded ${allData.length} leads…</td></tr>`;
+    if (page.length < PAGE) break; // last page
+    offset += PAGE;
+  }
+
+  window._pipelineLeads = allData;
+  filterPipeline('All', null);
+  renderPipelineStats(allData);
+}
+
+function renderPipelineStats(leads) {
+  const counts = { New: 0, Contacted: 0, Interested: 0, Scheduled: 0, Closed: 0 };
+  leads.forEach(l => { if (counts[l.status] !== undefined) counts[l.status]++; });
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('plTotal',     leads.length);
+  set('plNew',       counts.New);
+  set('plContacted', counts.Contacted);
+  set('plInterested',counts.Interested);
+  set('plScheduled', counts.Scheduled);
+  set('plClosed',    counts.Closed);
+}
+
+function filterPipeline(status, btn) {
+  document.querySelectorAll('.pipeline-filter').forEach(el => el.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const leads = window._pipelineLeads || [];
+  const isAll = status === 'All' || status === 'all';
+  const filtered = isAll ? leads : leads.filter(l => l.status === status);
+  renderPipelineTable(filtered);
+}
+
+function renderPipelineTable(leads) {
+  const tbody = document.getElementById('pipelineBody');
+  if (!tbody) return;
+  if (!leads.length) {
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:24px;color:#666">No leads found. Run a search and save to pipeline.</td></tr>';
+    return;
+  }
+  const statuses   = ['New','Contacted','Interested','Scheduled','Closed'];
+  const priorities = ['High','Medium','Low'];
+  tbody.innerHTML = leads.map(l => {
+    const st         = l.status   || 'New';
+    const pr         = l.priority || 'Medium';
+    const sid        = l.id.slice(0, 8);
+    const pushed     = isGhlPushed(l.id);
+    const verified   = !!l.verified;
+    const hasContact = !!(l.email && l.phone);
+    const socials    = [
+      l.facebook  ? `<a href="${esc(l.facebook)}"  target="_blank" title="Facebook" style="color:#1877f2;font-weight:700;text-decoration:none;font-size:11px">FB</a>`  : '',
+      l.instagram ? `<a href="${esc(l.instagram)}" target="_blank" title="Instagram" style="color:#C13584;font-weight:700;text-decoration:none;font-size:11px">IG</a>` : '',
+      l.website   ? `<a href="${esc(l.website)}"   target="_blank" title="${esc(l.website)}" style="text-decoration:none;font-size:12px">🔗</a>`  : ''
+    ].filter(Boolean).join(' ');
+
+    return `<tr data-id="${esc(l.id)}" class="${verified ? 'pl-verified' : ''}">
+      <td>
+        <select class="status-badge status-${esc(st)}" style="font-size:11px;padding:2px 6px;border-radius:12px;border:none;font-weight:700;cursor:pointer"
+                onchange="updateLeadStatus('${esc(l.id)}', this.value, this)">
+          ${statuses.map(s => `<option value="${s}" ${st===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select style="font-size:11px;padding:2px 4px;border-radius:6px;border:1px solid #ddd;cursor:pointer"
+                onchange="updateLeadStatus('${esc(l.id)}', null, null, this.value)">
+          ${priorities.map(p => `<option value="${p}" ${pr===p?'selected':''}>${p}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <div style="font-weight:700;font-size:12px">${esc(l.name)}</div>
+        <div style="font-size:11px;color:#666">${esc(l.business_type||'')} · ${esc(l.city||'')}${l.state?', '+esc(l.state):''}</div>
+        <button id="pl-verify-${sid}" class="btn-verify ${verified?'is-verified':'unverified'}"
+          onclick="toggleVerified('${esc(l.id)}',this)"
+          title="${verified ? 'Verified — click to unmark' : 'Mark as verified after calling'}">
+          ${verified ? '✓ Verified' : '○ Verify'}
+        </button>
+      </td>
+      <td><small style="color:#718096">${esc(l.category||'')}</small></td>
+      <td>
+        <input class="pl-input ${verified?'verified':''}" type="email"
+          value="${esc(l.email||'')}" placeholder="email@org.com"
+          title="Click to edit — saves automatically"
+          onblur="saveLeadField('${esc(l.id)}','email',this.value,this)"
+          onkeydown="if(event.key==='Enter')this.blur()" />
+      </td>
+      <td>
+        <input class="pl-input ${verified?'verified':''}" type="tel"
+          value="${esc(l.phone||'')}" placeholder="(555) 555-5555"
+          title="Click to edit — saves automatically"
+          onblur="saveLeadField('${esc(l.id)}','phone',this.value,this)"
+          onkeydown="if(event.key==='Enter')this.blur()" />
+      </td>
+      <td style="font-size:12px">
+        ${socials || ''}
+        <input class="pl-input" type="url"
+          value="${esc(l.website||'')}" placeholder="https://..."
+          title="Click to edit website — saves automatically"
+          style="margin-top:${socials?'3px':'0'}"
+          onblur="saveLeadField('${esc(l.id)}','website',this.value,this)"
+          onkeydown="if(event.key==='Enter')this.blur()" />
+      </td>
+      <td>
+        <textarea class="notes-input" rows="1" placeholder="call notes..."
+          onblur="updateLeadStatusNotes('${esc(l.id)}', this.value)">${esc(l.notes||'')}</textarea>
+      </td>
+      <td><span style="font-size:11px;color:#888">${esc(l.source||'')}</span></td>
+      <td>
+        <button id="pl-enrich-${sid}" onclick="enrichPipelineLead('${esc(l.id)}')"
+          title="${hasContact ? 'Re-enrich to find better data' : 'Auto-fill missing email/phone'}"
+          style="font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid #ddd;cursor:pointer;background:${hasContact?'#d1fae5':'#fff7ed'};color:${hasContact?'#065f46':'#92400e'}">
+          ${hasContact ? '✅' : '🔍 Fill'}
+        </button>
+      </td>
+      <td>
+        <button id="pl-ghl-${sid}" onclick="pushSingleToGHL('${esc(l.id)}')"
+          ${pushed ? 'disabled' : ''}
+          title="${pushed ? 'Already synced to GHL' : 'Push to GoHighLevel CRM'}"
+          style="font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid #ddd;cursor:${pushed?'default':'pointer'};background:${pushed?'#d1fae5':'#eef2ff'};color:${pushed?'#065f46':'#4338ca'}">
+          ${pushed ? '✅ GHL' : '📤 Push'}
+        </button>
+      </td>
+      <td><button onclick="showPipelineScript('${esc(l.id)}')" title="View outreach script"
+        style="font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid #ddd;cursor:pointer;background:#f8f9fa">📝</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function showPipelineScript(id) {
+  const lead = (window._pipelineLeads || []).find(l => l.id === id);
+  if (!lead) return;
+  // Map Supabase snake_case back to camelCase for generateScript
+  const mapped = {
+    name: lead.name, business_type: lead.business_type, category: lead.category,
+    email: lead.email, phone: lead.phone, website: lead.website,
+    city: lead.city, state: lead.state, fans: lead.fans,
+    fundraiserHistory: lead.fundraiser_history
+  };
+  document.getElementById('modalTitle').textContent = `Outreach Script — ${mapped.name}`;
+  document.getElementById('modalSub').textContent   = `${mapped.business_type||''} · ${mapped.city||''}, ${mapped.state||''}`;
+  document.getElementById('modalScript').value      = generateScript(mapped);
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+async function updateLeadStatus(id, status, selectEl, priority) {
+  const patch = { updated_at: new Date().toISOString() };
+  if (status)   patch.status   = status;
+  if (priority) patch.priority = priority;
+  if (selectEl && status) {
+    selectEl.className = `status-badge status-${status}`;
+    selectEl.style.cssText = ''; // reset inline, rely on class
+  }
+  await sbFetch(`localbizreach_leads?id=eq.${encodeURIComponent(id)}`, 'PATCH', patch);
+  if (window._pipelineLeads) {
+    const lead = window._pipelineLeads.find(l => l.id === id);
+    if (lead) {
+      if (status)   lead.status   = status;
+      if (priority) lead.priority = priority;
+    }
+    if (status) renderPipelineStats(window._pipelineLeads);
+  }
+}
+
+async function updateLeadStatusNotes(id, notes) {
+  await sbFetch(`localbizreach_leads?id=eq.${encodeURIComponent(id)}`, 'PATCH', { notes, updated_at: new Date().toISOString() });
+  if (window._pipelineLeads) {
+    const lead = window._pipelineLeads.find(l => l.id === id);
+    if (lead) lead.notes = notes;
+  }
+}
+
+function updateLeadNotes(idx, notes) {
+  if (filteredLeads[idx]) filteredLeads[idx].notes = notes;
+}
+
+// ── Enrichment Engine ──────────────────────────────────────────────────────────
+async function enrichAll() {
+  const btn = document.getElementById('enrichAllBtn');
+  const needsEnrichment = filteredLeads.filter(l => !l.email || !l.phone);
+  if (!needsEnrichment.length) { alert('All leads already have email & phone!'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = `⏳ Enriching 0/${needsEnrichment.length}...`; }
+
+  let done = 0;
+  for (let i = 0; i < filteredLeads.length; i++) {
+    const lead = filteredLeads[i];
+    if (lead.email && lead.phone) continue;
+    await enrichLead(lead, i);
+    done++;
+    if (btn) btn.textContent = `⏳ Enriching ${done}/${needsEnrichment.length}...`;
+    await sleep(600); // avoid rate limit
+  }
+  if (btn) { btn.disabled = false; btn.textContent = '🔍 Enrich All'; }
+  alert(`✅ Enrichment done! ${done} leads processed.`);
+}
+
+async function enrichSingle(idx) {
+  const lead = filteredLeads[idx];
+  if (!lead) return;
+  const btn = document.getElementById(`enrich-${idx}`);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+  await enrichLead(lead, idx);
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = (lead.email && lead.phone) ? '✅' : '🔍 Fill';
+  }
+}
+
+async function enrichLead(lead, idx) {
+  const tavilyKey = getKey('tavily');
+  if (!tavilyKey) return;
+
+  const city  = lead.city  || document.getElementById('cityInput').value.trim();
+  const state = lead.state || '';
+  const query = `"${lead.name}" ${city} ${state} contact email phone`;
+
+  try {
+    const resp = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: tavilyKey, query, max_results: 3, search_depth: 'basic' })
+    });
+    const data = await resp.json();
+    if (data.results) {
+      const combined = data.results.map(r => (r.content||'') + ' ' + (r.url||'')).join(' ');
+      // Extract email
+      if (!lead.email) {
+        const emailMatch = combined.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+        if (emailMatch) lead.email = emailMatch[0];
+      }
+      // Extract phone
+      if (!lead.phone) {
+        const phoneMatch = combined.match(/(\+?1[\s.-]?)?\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}/);
+        if (phoneMatch) lead.phone = phoneMatch[0].trim();
+      }
+      // Extract website
+      if (!lead.website) {
+        const webResult = data.results.find(r => r.url && !r.url.includes('facebook') && !r.url.includes('instagram') && !r.url.includes('yelp'));
+        if (webResult) lead.website = webResult.url;
+      }
+    }
+  } catch(e) { console.warn('Tavily enrich error:', e); }
+
+  // Hunter.io email fallback if still no email and we have a website
+  if (!lead.email && lead.website) {
+    const hunterEmail = await hunterEmailLookup(lead.name, lead.website);
+    if (hunterEmail) lead.email = hunterEmail;
+  }
+
+  // Update the editable result row inputs
+  updateResultRow(idx);
+}
+
+async function hunterEmailLookup(orgName, website) {
+  const key = localStorage.getItem('lbr_key_hunter') || '';
+  if (!key || !website) return null;
+  try {
+    let domain = website.replace(/https?:\/\//,'').replace(/www\./,'').split('/')[0];
+    const url = `https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(domain)}&company=${encodeURIComponent(orgName)}&limit=1&api_key=${encodeURIComponent(key)}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.data && data.data.emails && data.data.emails.length) {
+      return data.data.emails[0].value;
+    }
+  } catch(e) { console.warn('Hunter error:', e); }
+  return null;
+}
+
+// ── Pipeline Inline Edit & Verify ─────────────────────────────────────────────
+async function saveLeadField(id, field, value, inputEl) {
+  const l = (window._pipelineLeads || []).find(x => x.id === id);
+  if (!l) return;
+
+  const trimmed = value.trim();
+  if (trimmed === (l[field] || '')) return; // no change — skip
+
+  l[field] = trimmed; // update local cache
+
+  const patch = { updated_at: new Date().toISOString() };
+  patch[field] = trimmed;
+  await sbFetch(`localbizreach_leads?id=eq.${encodeURIComponent(id)}`, 'PATCH', patch);
+
+  // Brief green flash on the cell to confirm save
+  if (inputEl) {
+    const td = inputEl.closest('td');
+    if (td) {
+      td.classList.add('save-flash');
+      setTimeout(() => td.classList.remove('save-flash'), 1200);
+    }
+    // If verified styling, keep it
+    if (l.verified) inputEl.classList.add('verified');
+  }
+}
+
+async function toggleVerified(id, btnEl) {
+  const l = (window._pipelineLeads || []).find(x => x.id === id);
+  if (!l) return;
+
+  l.verified = !l.verified;
+  await sbFetch(`localbizreach_leads?id=eq.${encodeURIComponent(id)}`, 'PATCH', {
+    verified:    l.verified,
+    updated_at:  new Date().toISOString()
+  });
+
+  // Update button appearance
+  btnEl.textContent = l.verified ? '✓ Verified' : '○ Verify';
+  btnEl.className   = `btn-verify ${l.verified ? 'is-verified' : 'unverified'}`;
+
+  // Update row class + input styling
+  const row = btnEl.closest('tr');
+  if (row) {
+    row.classList.toggle('pl-verified', l.verified);
+    row.querySelectorAll('.pl-input').forEach(inp => {
+      inp.classList.toggle('verified', l.verified);
+    });
+  }
+}
+
+// ── GoHighLevel Integration ────────────────────────────────────────────────────
+function getGhlKey() {
+  return localStorage.getItem('lbr_key_ghl') || DEFAULT_GHL_KEY;
+}
+
+function isGhlPushed(id) {
+  try {
+    const pushed = JSON.parse(localStorage.getItem('lbr_ghl_pushed') || '[]');
+    return pushed.includes(id);
+  } catch(e) { return false; }
+}
+
+function markGhlPushed(id) {
+  try {
+    const pushed = new Set(JSON.parse(localStorage.getItem('lbr_ghl_pushed') || '[]'));
+    pushed.add(id);
+    localStorage.setItem('lbr_ghl_pushed', JSON.stringify([...pushed]));
+  } catch(e) {}
+}
+
+async function pushLeadToGHL(l) {
+  const key = getGhlKey();
+  if (!key) { alert('No GHL API key — add it in ⚙️ Settings.'); return false; }
+
+  // Best-effort first/last name split from org name
+  const parts     = (l.name || '').trim().split(/\s+/);
+  const firstName = parts[0] || 'Unknown';
+  const lastName  = parts.slice(1).join(' ') || '';
+
+  const body = {
+    firstName,
+    lastName,
+    companyName: l.name || '',
+    source:      'LocalBizReach',
+    tags:        ['Business-Lead', 'LocalBizReach', l.business_type, l.category].filter(Boolean),
+    customField: {
+      'Business Type':      l.business_type       || '',
+      'Category':           l.category            || '',
+      'Score':              String(l.score        || 0),
+      'Lead Source':        l.source              || '',
+      'City':               l.city                || '',
+      'State':              l.state               || ''
+    }
+  };
+  if (l.email)   body.email   = l.email;
+  if (l.phone)   body.phone   = l.phone;
+  if (l.website) body.website = l.website;
+  if (l.city)    body.city    = l.city;
+  if (l.state)   body.state   = l.state;
+
+  try {
+    const resp = await fetch('https://rest.gohighlevel.com/v1/contacts/', {
+      method:  'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type':  'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      return data.contact?.id || true;
+    }
+    const errText = await resp.text().catch(() => resp.status);
+    console.warn('GHL push failed:', resp.status, errText);
+    return false;
+  } catch(e) {
+    console.warn('GHL push error:', e);
+    return false;
+  }
+}
+
+async function pushSingleToGHL(id) {
+  const l = (window._pipelineLeads || []).find(x => x.id === id);
+  if (!l) return;
+  const sid = id.slice(0, 8);
+  const btn = document.getElementById(`pl-ghl-${sid}`);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+
+  const result = await pushLeadToGHL(l);
+  if (result) {
+    markGhlPushed(id);
+    if (btn) {
+      btn.textContent      = '✅ GHL';
+      btn.style.background = '#d1fae5';
+      btn.style.color      = '#065f46';
+      btn.disabled         = true;
+    }
+  } else {
+    if (btn) { btn.disabled = false; btn.textContent = '❌ Retry'; }
+    alert(`GHL push failed for "${l.name}". Check your API key in ⚙️ Settings.`);
+  }
+}
+
+async function pushAllToGHL() {
+  const key   = getGhlKey();
+  if (!key) { alert('No GHL API key — add it in ⚙️ Settings.'); return; }
+  const leads   = window._pipelineLeads || [];
+  const unpushed = leads.filter(l => !isGhlPushed(l.id));
+  if (!unpushed.length) { alert('All visible leads are already in GHL! ✅'); return; }
+
+  const btn = document.getElementById('btn-push-ghl');
+  if (btn) { btn.disabled = true; btn.textContent = `⏳ 0/${unpushed.length}`; }
+
+  let done = 0, failed = 0;
+  for (const l of unpushed) {
+    const result = await pushLeadToGHL(l);
+    if (result) {
+      markGhlPushed(l.id);
+      done++;
+      // Update row button live
+      const rowBtn = document.getElementById(`pl-ghl-${l.id.slice(0,8)}`);
+      if (rowBtn) {
+        rowBtn.textContent      = '✅ GHL';
+        rowBtn.style.background = '#d1fae5';
+        rowBtn.style.color      = '#065f46';
+        rowBtn.disabled         = true;
+      }
+    } else { failed++; }
+    if (btn) btn.textContent = `⏳ ${done+failed}/${unpushed.length}`;
+    await sleep(350); // avoid GHL rate limit
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = '📤 Push All → GHL'; }
+  alert(`✅ Pushed ${done} leads to GHL${failed ? ` · ${failed} failed (check console)` : ''}!`);
+}
+
+// ── Pipeline-level Enrichment ──────────────────────────────────────────────────
+async function enrichPipelineLead(id) {
+  const l = (window._pipelineLeads || []).find(x => x.id === id);
+  if (!l) return;
+  const sid = id.slice(0, 8);
+  const btn = document.getElementById(`pl-enrich-${sid}`);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+
+  // Map snake_case Supabase lead → camelCase object enrichLead() expects
+  const mapped = {
+    name:    l.name,    business_type: l.business_type,
+    email:   l.email,   phone:   l.phone,
+    website: l.website, city:    l.city,
+    state:   l.state
+  };
+
+  await enrichLead(mapped, -1); // -1 = don't touch search table DOM
+
+  // Write enriched fields back to Supabase if anything changed
+  const patch = { updated_at: new Date().toISOString() };
+  let changed = false;
+  if (mapped.email   && mapped.email   !== l.email)   { l.email   = mapped.email;   patch.email   = mapped.email;   changed = true; }
+  if (mapped.phone   && mapped.phone   !== l.phone)   { l.phone   = mapped.phone;   patch.phone   = mapped.phone;   changed = true; }
+  if (mapped.website && mapped.website !== l.website) { l.website = mapped.website; patch.website = mapped.website; changed = true; }
+
+  if (changed) {
+    await sbFetch(`localbizreach_leads?id=eq.${encodeURIComponent(id)}`, 'PATCH', patch);
+  }
+
+  // Update the row in the DOM (find by data-id attr)
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (row) {
+    const cells = row.querySelectorAll('td');
+    // col order: Status(0) Pri(1) Name(2) Cat(3) Email(4) Phone(5) Social(6) Notes(7) Src(8) Fill(9) GHL(10) Script(11)
+    if (cells[4]) cells[4].innerHTML = l.email
+      ? `<a href="mailto:${esc(l.email)}" style="font-size:12px;display:block;max-width:140px;overflow:hidden;text-overflow:ellipsis" title="${esc(l.email)}">${esc(l.email)}</a>`
+      : '<span style="color:#bbb">—</span>';
+    if (cells[5]) cells[5].innerHTML = l.phone
+      ? `<a href="tel:${esc(l.phone)}" style="font-size:12px">${esc(l.phone)}</a>`
+      : '<span style="color:#bbb">—</span>';
+  }
+
+  const hasContact = !!(l.email && l.phone);
+  if (btn) {
+    btn.disabled         = false;
+    btn.textContent      = hasContact ? '✅' : '🔍 Fill';
+    btn.style.background = hasContact ? '#d1fae5' : '#fff7ed';
+    btn.style.color      = hasContact ? '#065f46' : '#92400e';
+    btn.title            = hasContact ? 'Contact info complete' : 'Still missing info — try again later';
+  }
+}
+
+async function enrichAllPipeline() {
+  const leads   = window._pipelineLeads || [];
+  const missing = leads.filter(l => !l.email || !l.phone);
+  if (!missing.length) { alert('All pipeline leads already have email & phone! ✅'); return; }
+
+  const btn = document.getElementById('btn-enrich-pipeline');
+  if (btn) { btn.disabled = true; btn.textContent = `⏳ 0/${missing.length}`; }
+
+  let done = 0;
+  for (const l of missing) {
+    await enrichPipelineLead(l.id);
+    done++;
+    if (btn) btn.textContent = `⏳ ${done}/${missing.length}`;
+    await sleep(700);
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = '🔍 Enrich Missing'; }
+  alert(`✅ Enrichment done! Processed ${done} leads.`);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+document.getElementById('cityInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runDiscovery();
+});
+initTokenExpiry();
+updateDbNotice();
+</script>
+</body>
+</html>

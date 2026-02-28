@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThinkNLocal — Lead Discovery Suite</title>
+<style>
+  :root {
+    --navy: #6162DD;
+    --teal: #4a4bc4;
+    --green: #2CBC63;
+    --bg: #f5f6ff;
+    --text: #1a1a2e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); }
+
+  /* ── Top nav bar ── */
+  .topbar {
+    background: linear-gradient(135deg, #5051c9 0%, #6162DD 50%, #7374e8 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    height: 56px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 100;
+  }
+  .topbar .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 2rem;
+  }
+  .topbar .brand-logo {
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .topbar .brand h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .topbar .brand span {
+    font-size: 0.72rem;
+    opacity: 0.7;
+    display: block;
+    margin-top: -1px;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    height: 100%;
+    align-items: flex-end;
+    padding-bottom: 0;
+  }
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: 10px 10px 0 0;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    border-bottom: none;
+    user-select: none;
+    position: relative;
+    bottom: -1px;
+  }
+  .tab:hover {
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9);
+  }
+  .tab.active {
+    background: var(--bg);
+    color: var(--navy);
+    border-color: rgba(0,0,0,0.08);
+  }
+  .tab .icon {
+    font-size: 1.1rem;
+  }
+  .tab .badge {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .tab.active .badge {
+    background: var(--navy);
+    color: white;
+  }
+
+  /* ── Right side ── */
+  .topbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px rgba(44,188,99,0.5);
+  }
+  .status-text {
+    font-size: 0.72rem;
+    opacity: 0.7;
+  }
+
+  /* ── Iframe container ── */
+  .frame-wrap {
+    width: 100%;
+    height: calc(100vh - 56px);
+    position: relative;
+  }
+  .frame-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    top: 0; left: 0;
+    background: var(--bg);
+  }
+  .frame-wrap iframe.hidden {
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .frame-wrap iframe.visible {
+    visibility: visible;
+    pointer-events: auto;
+    z-index: 1;
+  }
+
+  /* ── Loading state ── */
+  .loading-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    z-index: 50;
+    transition: opacity 0.3s ease;
+  }
+  .loading-overlay.fade { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #e2e2f5;
+    border-top-color: var(--navy);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 0.85rem; color: #6b6b8a; }
+</style>
+</head>
+<body>
+
+<!-- ── Top Navigation Bar ── -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-logo">🎯</div>
+    <div>
+      <h1>ThinkNLocal</h1>
+      <span>Lead Discovery Suite</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-fundreach" onclick="switchTab('fundreach')">
+      <span class="icon">🏛️</span>
+      FundReach
+      <span class="badge">NONPROFITS</span>
+    </div>
+    <div class="tab" id="tab-localbizreach" onclick="switchTab('localbizreach')">
+      <span class="icon">🏪</span>
+      LocalBizReach
+      <span class="badge">BUSINESSES</span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="status-dot"></div>
+    <div class="status-text">All systems online</div>
+  </div>
+</div>
+
+<!-- ── Content Area ── -->
+<div class="frame-wrap" id="frameWrap">
+  <div class="loading-overlay" id="loader">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading ThinkNLocal Suite...</div>
+  </div>
+  <iframe id="frame-fundreach" class="visible" src="fundreach.html" onload="frameLoaded('fundreach')"></iframe>
+  <iframe id="frame-localbizreach" class="hidden" src="localbizreach.html" onload="frameLoaded('localbizreach')"></iframe>
+</div>
+
+<script>
+  let activeTab = 'fundreach';
+  let loadedFrames = new Set();
+
+  function switchTab(name) {
+    if (name === activeTab) return;
+    activeTab = name;
+
+    // Update tab styles
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+
+    // Show/hide iframes
+    document.querySelectorAll('.frame-wrap iframe').forEach(f => {
+      f.classList.remove('visible');
+      f.classList.add('hidden');
+    });
+    document.getElementById('frame-' + name).classList.remove('hidden');
+    document.getElementById('frame-' + name).classList.add('visible');
+  }
+
+  function frameLoaded(name) {
+    loadedFrames.add(name);
+    if (loadedFrames.size >= 2) {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('fade');
+      }, 300);
+    }
+  }
+
+  // Keyboard shortcut: Ctrl+1 / Ctrl+2 to switch tabs
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === '1') { e.preventDefault(); switchTab('fundreach'); }
+    if ((e.ctrlKey || e.metaKey) && e.key === '2') { e.preventDefault(); switchTab('localbizreach'); }
+  });
+</script>
+
+</body>
+</html>
